@@ -33,8 +33,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  String _sortColumn = 'Added/Updated';
-  bool _sortAscending = false;
+  String _sortColumn = 'Item Name';
+  bool _sortAscending = true;
 
   void _onSort(String column) {
     setState(() {

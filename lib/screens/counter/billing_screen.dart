@@ -633,12 +633,9 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
     }).toList();
 
     mapped.sort((a, b) {
-      final expA = a['expiry_date'] as String;
-      final expB = b['expiry_date'] as String;
-      if (expA == '-' && expB == '-') return 0;
-      if (expA == '-') return 1;
-      if (expB == '-') return -1;
-      return expA.compareTo(expB);
+      final nameA = (a['name'] ?? '').toString().toLowerCase();
+      final nameB = (b['name'] ?? '').toString().toLowerCase();
+      return nameA.compareTo(nameB);
     });
 
     return mapped;
