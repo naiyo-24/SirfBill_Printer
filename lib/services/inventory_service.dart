@@ -75,10 +75,22 @@ class InventoryItem {
       gst: json['gst'] != null ? (json['gst'] as num).toDouble() : 0.0,
       discount: json['discount'] != null ? (json['discount'] as num).toDouble() : 0.0,
       packSize: json['pack_size'] != null ? int.tryParse(json['pack_size'].toString()) ?? 1 : 1,
-      rackId: json['rack_id'],
-      categoryId: json['category_id'],
-      distributor: json['distributor'],
-      distributorId: json['distributor_id'],
+      rackId: json['rack_id']?.toString(),
+      categoryId: json['category_id']?.toString(),
+      distributor: (json['distributor'] is Map
+              ? (json['distributor']['name'] ??
+                      json['distributor']['distributor_name'])
+                  ?.toString()
+              : null) ??
+          json['distributor_name']?.toString() ??
+          (json['distributor'] is String &&
+                  (json['distributor'] as String).isNotEmpty
+              ? json['distributor'] as String
+              : null),
+      distributorId: json['distributor_id']?.toString() ??
+          (json['distributor'] is Map
+              ? json['distributor']['id']?.toString()
+              : null),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
     );
@@ -104,6 +116,8 @@ class InventoryItem {
       'rack_id': rackId,
       'category_id': categoryId,
       'distributor_id': distributorId,
+      'distributor': distributor,
+      'distributor_name': distributor,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
@@ -246,7 +260,7 @@ class InventoryService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response.data['data'] as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to add medicine: ${response.data}');
+        throw Exception('Failed to add item: ${response.data}');
       }
     } catch (e) {
       if (e is DioException &&
@@ -294,10 +308,10 @@ class InventoryService {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to update medicine: ${response.data}');
+        throw Exception('Failed to update item: ${response.data}');
       }
     } catch (e) {
-      throw Exception('Error updating medicine: $e');
+      throw Exception('Error updating item: $e');
     }
   }
 
@@ -308,10 +322,10 @@ class InventoryService {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to delete medicine: ${response.data}');
+        throw Exception('Failed to delete item: ${response.data}');
       }
     } catch (e) {
-      throw Exception('Error deleting medicine: $e');
+      throw Exception('Error deleting item: $e');
     }
   }
 }

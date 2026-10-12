@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../providers/counter_providers.dart';
-import '../../../../../utils/format_utils.dart';
+import '../../../../utils/format_utils.dart';
 import '../../../../widgets/horizontal_scroll_wrapper.dart';
 import 'billing_dialogs.dart';
 class BillingLeftPanel extends ConsumerStatefulWidget {
@@ -339,7 +339,7 @@ class _BillingLeftPanelState extends ConsumerState<BillingLeftPanel> {
             ),
           ),
 
-          // Medicines Table
+          // Items Table
           _buildConditionalExpanded(
             widget.hasEnoughHeight,
             LayoutBuilder(
@@ -347,7 +347,7 @@ class _BillingLeftPanelState extends ConsumerState<BillingLeftPanel> {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // FIXED LEFT COLUMN (Medicine Name)
+                    // FIXED LEFT COLUMN (Item Name)
                     Container(
                       width: widget.isDesktopWidth ? 200 : 120,
                       decoration: BoxDecoration(

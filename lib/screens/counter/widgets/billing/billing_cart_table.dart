@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../notifiers/billing_notifier.dart';
-import '../../../../../utils/format_utils.dart';
+import '../../../../notifiers/billing_notifier.dart';
+import '../../../../utils/format_utils.dart';
 import '../../../../widgets/horizontal_scroll_wrapper.dart';
 
 class BillingCartTable extends StatefulWidget {

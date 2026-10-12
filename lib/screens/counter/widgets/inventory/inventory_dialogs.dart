@@ -4,7 +4,8 @@ import '../../../../widgets/rack_dropdown.dart';
 import '../../../../widgets/category_dropdown.dart';
 import '../../../../widgets/distributor_dropdown.dart';
 import '../../../../services/inventory_service.dart';
-import '../../../../../utils/responsive.dart';
+import '../../../../providers/distributor_provider.dart';
+import '../../../../utils/responsive.dart';
 
 class InventoryDialogs {
   static Widget _buildResponsiveRow(BuildContext context, List<Widget> children) {
@@ -60,7 +61,18 @@ class InventoryDialogs {
     final expiryCtrl = TextEditingController(text: item.expiryDate);
     String? selectedRackId = item.rackId;
     String? selectedCategoryId = item.categoryId;
+
+    final allDistributors = ref.read(distributorsProvider).value ?? [];
     String? selectedDistributorId = item.distributorId;
+    if (selectedDistributorId == null && item.distributor != null && item.distributor!.isNotEmpty) {
+      final distMatch = allDistributors.firstWhere(
+        (d) => d['name']?.toString().toLowerCase() == item.distributor!.toLowerCase(),
+        orElse: () => null,
+      );
+      if (distMatch != null) {
+        selectedDistributorId = distMatch['id']?.toString();
+      }
+    }
 
     showDialog(
       context: context,
@@ -90,7 +102,7 @@ class InventoryDialogs {
                     child: TextField(
                       controller: nameCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Medicine Name',
+                        labelText: 'Item Name',
                       ),
                     ),
                   ),
@@ -300,6 +312,16 @@ class InventoryDialogs {
                           'rack_id': selectedRackId,
                           'category_id': selectedCategoryId,
                           'distributor_id': selectedDistributorId,
+                          if (selectedDistributorId != null) ...{
+                            'distributor': allDistributors.firstWhere(
+                              (d) => d['id']?.toString() == selectedDistributorId,
+                              orElse: () => null,
+                            )?['name'],
+                            'distributor_name': allDistributors.firstWhere(
+                              (d) => d['id']?.toString() == selectedDistributorId,
+                              orElse: () => null,
+                            )?['name'],
+                          },
                           'hsn_code': hsnCtrl.text,
                           'expiry_date': expiryCtrl.text,
                         });

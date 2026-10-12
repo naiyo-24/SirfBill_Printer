@@ -43,7 +43,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
   final FocusNode _customerSearchFocusNode = FocusNode();
   final TextEditingController _customerPhoneController = TextEditingController();
   final TextEditingController _customerLocationController = TextEditingController();
-  final TextEditingController _medicineSearchController = TextEditingController();
+  final TextEditingController _itemSearchController = TextEditingController();
 
   Timer? _searchDebounce;
   String? _savedCustomerId;
@@ -103,7 +103,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
     _customerSearchFocusNode.dispose();
     _customerPhoneController.dispose();
     _customerLocationController.dispose();
-    _medicineSearchController.dispose();
+    _itemSearchController.dispose();
     _searchDebounce?.cancel();
     super.dispose();
   }
@@ -644,7 +644,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
   @override
   Widget build(BuildContext context) {
     final inventoryState = ref.watch(billingInventoryProvider);
-    final allMedicines = inventoryState.when(
+    final allItems = inventoryState.when(
       data: _mapAndSortInventory,
       loading: () => <Map<String, dynamic>>[],
       error: (_, _) => <Map<String, dynamic>>[],
@@ -668,8 +668,8 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
               }
 
               ref.read(billingInventoryProvider.notifier).loadInventory(
-                searchQuery: _medicineSearchController.text.isNotEmpty
-                    ? _medicineSearchController.text
+                searchQuery: _itemSearchController.text.isNotEmpty
+                    ? _itemSearchController.text
                     : null,
                 categoryId: categoryId,
               );
@@ -695,7 +695,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                     data: (_) => BillingLeftPanel(
                       isDesktopWidth: isDesktopWidth,
                       hasEnoughHeight: isDesktopWidth ? hasEnoughHeight : true,
-                      filteredItems: allMedicines,
+                      filteredItems: allItems,
                       categories: dynamicCategories,
                       selectedCategoryIndex: ref.watch(billingProvider).selectedCategoryIndex,
                       onAddToCart: _addToCart,
@@ -706,7 +706,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                           categoryId = backendCategories[index - 1].id;
                         }
                         ref.read(billingInventoryProvider.notifier).loadInventory(
-                          searchQuery: _medicineSearchController.text,
+                          searchQuery: _itemSearchController.text,
                           categoryId: categoryId,
                         );
                       },
@@ -714,7 +714,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                       onLoadMore: () {
                         ref.read(billingInventoryProvider.notifier).loadMore();
                       },
-                      searchController: _medicineSearchController,
+                      searchController: _itemSearchController,
                       onSearch: (q) {
                         _searchDebounce?.cancel();
                         _searchDebounce = Timer(const Duration(milliseconds: 350), () {

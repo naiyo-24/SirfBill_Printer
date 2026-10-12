@@ -14,7 +14,8 @@ class ShopSettings {
   final String terms1;
   final String terms2;
   final String terms3;
-  final String drugLicence;
+  final String cinNumber;
+  String get drugLicence => cinNumber;
   final String? tenantId;
 
   ShopSettings({
@@ -33,9 +34,10 @@ class ShopSettings {
     required this.terms1,
     required this.terms2,
     required this.terms3,
-    required this.drugLicence,
+    String? cinNumber,
+    String? drugLicence,
     this.tenantId,
-  });
+  }) : cinNumber = cinNumber ?? drugLicence ?? '';
 
   factory ShopSettings.fromMap(Map<String, dynamic> map) {
     return ShopSettings(
@@ -54,7 +56,7 @@ class ShopSettings {
       terms1: map['terms_1'] ?? '',
       terms2: map['terms_2'] ?? '',
       terms3: map['terms_3'] ?? '',
-      drugLicence: map['drug_licence'] ?? '',
+      cinNumber: map['cin_number'] ?? map['drug_licence'] ?? '',
       tenantId: map['tenant_id'],
     );
   }
@@ -76,7 +78,8 @@ class ShopSettings {
       'terms_1': terms1,
       'terms_2': terms2,
       'terms_3': terms3,
-      'drug_licence': drugLicence,
+      'cin_number': cinNumber,
+      'drug_licence': cinNumber,
       'tenant_id': tenantId,
     };
   }

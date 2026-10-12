@@ -53,7 +53,7 @@ class PurchaseSearchPanel extends ConsumerWidget {
                 IconButton(
                   onPressed: onRefresh,
                   icon: const Icon(Icons.refresh),
-                  tooltip: 'Refresh Medicines',
+                  tooltip: 'Refresh Items',
                   style: IconButton.styleFrom(
                     backgroundColor: isDark
                         ? Colors.green.shade900.withValues(alpha: 0.3)
@@ -84,7 +84,10 @@ class PurchaseSearchPanel extends ConsumerWidget {
                     final matchesSearch = i.name.toLowerCase().contains(q) ||
                         i.sku.toLowerCase().contains(q);
                     final matchesDistributor = !filterByDistributor ||
-                        i.distributorId == distributor['id'] ||
+                        (i.distributorId != null &&
+                            distributor['id'] != null &&
+                            i.distributorId.toString() ==
+                                distributor['id'].toString()) ||
                         (i.distributor != null &&
                             distributor['name'] != null &&
                             i.distributor!.toLowerCase() ==
@@ -151,7 +154,7 @@ class PurchaseSearchPanel extends ConsumerWidget {
                   foregroundColor: const Color(0xFF166534),
                   side: const BorderSide(color: Color(0xFF166534)),
                 ),
-                child: const Text('Load More Medicines'),
+                child: const Text('Load More Items'),
               ),
             ),
           ],

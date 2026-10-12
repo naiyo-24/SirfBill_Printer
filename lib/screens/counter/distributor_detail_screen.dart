@@ -90,13 +90,16 @@ class DistributorDetailScreen extends ConsumerWidget {
             
             // Analytics Section
             const Text(
-              'Sales Analytics (Top 5 Medicines)',
+              'Sales Analytics (Top 5 Items)',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
             ),
             const SizedBox(height: 16),
             analyticsAsync.when(
               data: (analytics) {
-                final topItems = analytics['top_selling_medicines'] as List<dynamic>? ?? [];
+                final topItems = (analytics['top_selling_items'] ??
+                        analytics['top_selling_medicines'])
+                    as List<dynamic>? ??
+                    [];
                 
                 return Column(
                   children: [
@@ -235,20 +238,32 @@ class DistributorDetailScreen extends ConsumerWidget {
                             ),
                             title: Text('Invoice: ${bill['invoice_no'] ?? 'N/A'}', style: const TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Text('Date: $dateStr • Items: ${bill['items']?.length ?? 0}'),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('₹${bill['total_amount'] ?? 0.0}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                Text(
-                                  bill['payment_status'] ?? 'UNPAID',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: bill['payment_status'] == 'PAID' ? Colors.green : Colors.orange,
-                                  ),
-                                ),
-                              ],
+                            trailing: Builder(
+                              builder: (context) {
+                                final totalAmount = (bill['total_amount'] as num?)?.toDouble() ?? 0.0;
+                                final subtotal = (bill['subtotal'] as num?)?.toDouble() ?? 0.0;
+                                final totalGst = (bill['total_gst'] as num?)?.toDouble() ?? 0.0;
+                                final totalDiscount = (bill['total_discount'] as num?)?.toDouble() ?? 0.0;
+                                final billTotal = totalAmount > 0
+                                    ? totalAmount
+                                    : (subtotal + totalGst - totalDiscount);
+
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text('₹${billTotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                    Text(
+                                      bill['payment_status'] ?? 'UNPAID',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: bill['payment_status'] == 'PAID' ? Colors.green : Colors.orange,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                             onTap: () {
                               _showBillDetails(context, ref, bill);
@@ -332,13 +347,25 @@ class DistributorDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Text('Total Amount:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 16),
-                  Text('₹${bill['total_amount'] ?? 0.0}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF3B82F6))),
-                ],
+              Builder(
+                builder: (context) {
+                  final totalAmount = (bill['total_amount'] as num?)?.toDouble() ?? 0.0;
+                  final subtotal = (bill['subtotal'] as num?)?.toDouble() ?? 0.0;
+                  final totalGst = (bill['total_gst'] as num?)?.toDouble() ?? 0.0;
+                  final totalDiscount = (bill['total_discount'] as num?)?.toDouble() ?? 0.0;
+                  final billTotal = totalAmount > 0
+                      ? totalAmount
+                      : (subtotal + totalGst - totalDiscount);
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text('Total Amount:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 16),
+                      Text('₹${billTotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF3B82F6))),
+                    ],
+                  );
+                },
               ),
             ],
           ),

@@ -92,6 +92,7 @@ class InventoryRowRightWidget extends StatelessWidget {
   final InventoryItem item;
   final String rackName;
   final String categoryName;
+  final String? distributorName;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -102,6 +103,7 @@ class InventoryRowRightWidget extends StatelessWidget {
     required this.item,
     required this.rackName,
     required this.categoryName,
+    this.distributorName,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
@@ -226,7 +228,9 @@ class InventoryRowRightWidget extends StatelessWidget {
             Expanded(
               flex: 120,
               child: Text(
-                item.distributor ?? '-',
+                (distributorName != null && distributorName!.isNotEmpty)
+                    ? distributorName!
+                    : (item.distributor ?? '-'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : const Color(0xFF64748B), fontSize: 12),

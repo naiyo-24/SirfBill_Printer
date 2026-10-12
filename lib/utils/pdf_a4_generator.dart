@@ -27,7 +27,8 @@ class PdfA4Generator {
     required String landline,
     required String email,
     required String shopGstNo,
-    required String drugLicence,
+    String cinNumber = '',
+    String drugLicence = '',
     required String bankName,
     required String branchName,
     required String acHolder,
@@ -44,6 +45,7 @@ class PdfA4Generator {
   }) async {
     final pdf = pw.Document(theme: theme);
     String format = 'A4'; // Hardcode format so ternary logic still evaluates cleanly
+    final displayCin = cinNumber.isNotEmpty ? cinNumber : drugLicence;
 
     pdf.addPage(
       pw.MultiPage(
@@ -110,9 +112,9 @@ class PdfA4Generator {
                             fontWeight: pw.FontWeight.bold,
                           ),
                         ),
-                        if (drugLicence.isNotEmpty)
+                        if (displayCin.isNotEmpty)
                           pw.Text(
-                            'D.L. No.: $drugLicence',
+                            'CIN: $displayCin',
                             style: pw.TextStyle(
                               fontSize: format == 'A4' ? 10 : 8,
                               fontWeight: pw.FontWeight.bold,

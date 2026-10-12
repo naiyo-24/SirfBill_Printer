@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class PurchaseActionsBar extends StatelessWidget {
   final TextEditingController invoiceController;
   final bool isLoading;
-  final VoidCallback onAddNewMedicine;
+  final VoidCallback onAddNewItem;
   final VoidCallback onConfirmPurchase;
 
   const PurchaseActionsBar({
     super.key,
     required this.invoiceController,
     required this.isLoading,
-    required this.onAddNewMedicine,
+    required this.onAddNewItem,
     required this.onConfirmPurchase,
   });
 
@@ -23,9 +23,9 @@ class PurchaseActionsBar extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         ElevatedButton.icon(
-          onPressed: onAddNewMedicine,
+          onPressed: onAddNewItem,
           icon: const Icon(Icons.add, size: 18),
-          label: const Text('Add New Medicine'),
+          label: const Text('Add New Item'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF166534),
             foregroundColor: Colors.white,

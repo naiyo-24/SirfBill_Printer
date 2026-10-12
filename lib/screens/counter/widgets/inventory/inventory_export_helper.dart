@@ -54,6 +54,7 @@ class InventoryExportHelper {
     required List<InventoryItem> items,
     required List<Rack> racks,
     required List<Category> categories,
+    List<dynamic> distributors = const [],
     required Map<String, dynamic> settings,
   }) async {
     final data = items.map((m) {
@@ -69,6 +70,13 @@ class InventoryExportHelper {
             orElse: () => Category(id: '', name: 'N/A'),
           )
           .name;
+      final distMatch = distributors.firstWhere(
+        (d) => d['id']?.toString() == m.distributorId?.toString(),
+        orElse: () => null,
+      );
+      final distName = (m.distributor != null && m.distributor!.isNotEmpty)
+          ? m.distributor!
+          : (distMatch?['name']?.toString() ?? 'N/A');
 
       return {
         'Name': m.name,
@@ -85,7 +93,7 @@ class InventoryExportHelper {
         'Expiry': m.expiryDate,
         'Rack': rackName,
         'Category': categoryName,
-        'Distributor': m.distributor ?? 'N/A',
+        'Distributor': distName,
         'HSN Code': m.hsnCode ?? 'N/A',
       };
     }).toList();

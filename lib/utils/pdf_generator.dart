@@ -178,7 +178,9 @@ class PdfGenerator {
     final String landline = shopSettings?['landline'] ?? '';
     final String email = shopSettings?['email'] ?? 'contact@sirfbill.com';
     final String shopGstNo = shopSettings?['gst_number'] ?? 'Not Available';
-    final String drugLicence = shopSettings?['drug_licence'] ?? '';
+    final String cinNumber =
+        shopSettings?['cin_number'] ?? shopSettings?['drug_licence'] ?? '';
+    final String drugLicence = cinNumber;
     final String customerGstNo = gstNumber?.isNotEmpty == true
         ? gstNumber!
         : '';
@@ -219,6 +221,7 @@ class PdfGenerator {
         address: address,
         phone: phone,
         shopGstNo: shopGstNo,
+        cinNumber: cinNumber,
         drugLicence: drugLicence,
         logoImage: logoImage,
         qrImage: qrImage,
@@ -247,6 +250,7 @@ class PdfGenerator {
         phone: phone,
         email: email,
         shopGstNo: shopGstNo,
+        cinNumber: cinNumber,
         drugLicence: drugLicence,
         bankName: bankName,
         branchName: branchName,
@@ -286,6 +290,7 @@ class PdfGenerator {
         landline: landline,
         email: email,
         shopGstNo: shopGstNo,
+        cinNumber: cinNumber,
         drugLicence: drugLicence,
         bankName: bankName,
         branchName: branchName,

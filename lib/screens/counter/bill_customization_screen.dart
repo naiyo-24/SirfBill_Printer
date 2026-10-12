@@ -39,7 +39,7 @@ class _BillCustomizationScreenState
   final TextEditingController _landlineCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _gstCtrl = TextEditingController();
-  final TextEditingController _drugLicenceCtrl = TextEditingController();
+  final TextEditingController _cinNumberCtrl = TextEditingController();
 
   final TextEditingController _bankNameCtrl = TextEditingController();
   final TextEditingController _branchNameCtrl = TextEditingController();
@@ -93,7 +93,7 @@ class _BillCustomizationScreenState
     _landlineCtrl.dispose();
     _emailCtrl.dispose();
     _gstCtrl.dispose();
-    _drugLicenceCtrl.dispose();
+    _cinNumberCtrl.dispose();
     _bankNameCtrl.dispose();
     _branchNameCtrl.dispose();
     _acHolderCtrl.dispose();
@@ -115,7 +115,7 @@ class _BillCustomizationScreenState
       _landlineCtrl.text = settings['landline'] ?? '';
       _emailCtrl.text = settings['email'] ?? '';
       _gstCtrl.text = settings['gst_number'] ?? '';
-      _drugLicenceCtrl.text = settings['drug_licence'] ?? '';
+      _cinNumberCtrl.text = settings['cin_number'] ?? settings['drug_licence'] ?? '';
 
       _bankNameCtrl.text = settings['bank_name'] ?? '';
       _branchNameCtrl.text = settings['branch_name'] ?? '';
@@ -157,6 +157,19 @@ class _BillCustomizationScreenState
       return;
     }
 
+    final cin = _cinNumberCtrl.text.trim();
+    if (cin.isNotEmpty && !RegExp(r'^[A-Za-z0-9]{21}$').hasMatch(cin)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'CIN Number must be exactly 21 alphanumeric characters',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
     try {
       final data = {
@@ -167,7 +180,8 @@ class _BillCustomizationScreenState
         'landline': _landlineCtrl.text,
         'email': _emailCtrl.text,
         'gst_number': _gstCtrl.text,
-        'drug_licence': _drugLicenceCtrl.text,
+        'cin_number': _cinNumberCtrl.text.trim(),
+        'drug_licence': _cinNumberCtrl.text.trim(),
         'bank_name': _bankNameCtrl.text,
         'branch_name': _branchNameCtrl.text,
         'ac_holder_name': _acHolderCtrl.text,
@@ -301,7 +315,7 @@ class _BillCustomizationScreenState
         landline: _landlineCtrl.text,
         email: _emailCtrl.text,
         gstNumber: _gstCtrl.text,
-        drugLicence: _drugLicenceCtrl.text,
+        cinNumber: _cinNumberCtrl.text,
         bankName: _bankNameCtrl.text,
         branchName: _branchNameCtrl.text,
         acHolderName: _acHolderCtrl.text,
@@ -542,7 +556,7 @@ class _BillCustomizationScreenState
                                       landlineCtrl: _landlineCtrl,
                                       emailCtrl: _emailCtrl,
                                       gstCtrl: _gstCtrl,
-                                      drugLicenceCtrl: _drugLicenceCtrl,
+                                      cinNumberCtrl: _cinNumberCtrl,
                                     ),
                                     const SizedBox(height: 16),
                                     BankDetailsCard(

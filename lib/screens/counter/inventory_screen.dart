@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/counter_providers.dart';
+import '../../providers/distributor_provider.dart';
 import '../../services/inventory_service.dart';
 import '../../widgets/custom_date_range_picker.dart';
 
@@ -160,6 +161,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final items = ref.read(inventoryProvider).value ?? [];
     final racks = ref.read(rackProvider).value ?? [];
     final categories = ref.read(categoryProvider).value ?? [];
+    final distributors = ref.read(distributorsProvider).value ?? [];
     final settings = ref.read(settingsProvider).value ?? {};
 
     InventoryExportHelper.exportData(
@@ -168,6 +170,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       items: items,
       racks: racks,
       categories: categories,
+      distributors: distributors,
       settings: settings,
     );
   }
@@ -253,6 +256,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final selectedShopId = ref.watch(selectedShopIdProvider);
     final racks = ref.watch(rackProvider).value ?? [];
     final categories = ref.watch(categoryProvider).value ?? [];
+    final distributors = ref.watch(distributorsProvider).value ?? [];
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -376,6 +380,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                             sortedItems: sortedItems,
                             racks: racks,
                             categories: categories,
+                            distributors: distributors,
                             isDesktopWidth: isDesktopWidth,
                             screenConstraints: screenConstraints,
                             sortColumn: _sortColumn,

@@ -9,7 +9,7 @@ class ShopDetailsCard extends StatelessWidget {
   final TextEditingController landlineCtrl;
   final TextEditingController emailCtrl;
   final TextEditingController gstCtrl;
-  final TextEditingController drugLicenceCtrl;
+  final TextEditingController cinNumberCtrl;
 
   const ShopDetailsCard({
     super.key,
@@ -20,7 +20,7 @@ class ShopDetailsCard extends StatelessWidget {
     required this.landlineCtrl,
     required this.emailCtrl,
     required this.gstCtrl,
-    required this.drugLicenceCtrl,
+    required this.cinNumberCtrl,
   });
 
   @override
@@ -38,52 +38,58 @@ class ShopDetailsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Shop Details',
+              'Shop / Pharmacy Details',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : const Color(0xFF1E293B),
               ),
             ),
             const SizedBox(height: 16),
             CustomizationTextField(
-              label: 'Shop Name',
+              label: 'Shop / Pharmacy Name',
               controller: shopNameCtrl,
             ),
+            const SizedBox(height: 12),
             CustomizationTextField(
-              label: 'Tagline',
+              label: 'Tagline / Slogan',
               controller: taglineCtrl,
             ),
+            const SizedBox(height: 12),
             CustomizationTextField(
               label: 'Address',
               controller: addressCtrl,
               maxLines: 2,
             ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: CustomizationTextField(
-                    label: 'Phone',
+                    label: 'Primary Phone',
                     controller: phoneCtrl,
-                    maxLength: 10,
                     keyboardType: TextInputType.phone,
+                    maxLength: 10,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: CustomizationTextField(
-                    label: 'Landline',
+                    label: 'Landline (Optional)',
                     controller: landlineCtrl,
+                    keyboardType: TextInputType.phone,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: CustomizationTextField(
-                    label: 'Email',
+                    label: 'Email Address',
                     controller: emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -100,8 +106,9 @@ class ShopDetailsCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: CustomizationTextField(
-                    label: 'Drug Licence',
-                    controller: drugLicenceCtrl,
+                    label: 'CIN Number',
+                    controller: cinNumberCtrl,
+                    maxLength: 21,
                   ),
                 ),
               ],

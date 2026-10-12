@@ -226,7 +226,7 @@ class _AddPurchaseBillScreenState extends ConsumerState<AddPurchaseBillScreen> {
             );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Medicine list refreshed!'),
+            content: Text('Item list refreshed!'),
             duration: Duration(seconds: 1),
           ),
         );
@@ -308,7 +308,7 @@ class _AddPurchaseBillScreenState extends ConsumerState<AddPurchaseBillScreen> {
     final actionsBar = PurchaseActionsBar(
       invoiceController: _invoiceCtrl,
       isLoading: _isLoading,
-      onAddNewMedicine: () => showAddPurchaseItemDialog(
+      onAddNewItem: () => showAddPurchaseItemDialog(
         context: context,
         ref: ref,
         distributor: widget.distributor,

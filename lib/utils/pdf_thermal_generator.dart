@@ -20,13 +20,15 @@ class PdfThermalGenerator {
     required String address,
     required String phone,
     required String shopGstNo,
-    required String drugLicence,
+    String cinNumber = '',
+    String drugLicence = '',
     pw.ImageProvider? logoImage,
     pw.ImageProvider? qrImage,
     DateTime? billingDate,
     pw.ThemeData? theme,
   }) async {
     final pdf = pw.Document(theme: theme);
+    final displayCin = cinNumber.isNotEmpty ? cinNumber : drugLicence;
 
     pdf.addPage(
       pw.Page(
@@ -66,9 +68,9 @@ class PdfThermalGenerator {
                 ),
                 textAlign: pw.TextAlign.center,
               ),
-              if (drugLicence.isNotEmpty)
+              if (displayCin.isNotEmpty)
                 pw.Text(
-                  'D.L. No.: $drugLicence',
+                  'CIN: $displayCin',
                   style: pw.TextStyle(
                     fontSize: 8,
                     fontWeight: pw.FontWeight.bold,

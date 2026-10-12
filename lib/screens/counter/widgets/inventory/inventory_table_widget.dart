@@ -10,6 +10,7 @@ class InventoryTableWidget extends StatelessWidget {
   final List<InventoryItem> sortedItems;
   final List<Rack> racks;
   final List<Category> categories;
+  final List<dynamic> distributors;
   final bool isDesktopWidth;
   final BoxConstraints screenConstraints;
   final String sortColumn;
@@ -28,6 +29,7 @@ class InventoryTableWidget extends StatelessWidget {
     required this.sortedItems,
     required this.racks,
     required this.categories,
+    this.distributors = const [],
     required this.isDesktopWidth,
     required this.screenConstraints,
     required this.sortColumn,
@@ -255,11 +257,22 @@ class InventoryTableWidget extends StatelessWidget {
                                   orElse: () => Category(id: '', name: 'N/A'),
                                 )
                                 .name;
+                            final distMatch = distributors.firstWhere(
+                              (d) =>
+                                  d['id']?.toString() ==
+                                  item.distributorId?.toString(),
+                              orElse: () => null,
+                            );
+                            final distributorName = (item.distributor != null &&
+                                    item.distributor!.isNotEmpty)
+                                ? item.distributor
+                                : distMatch?['name']?.toString();
 
                             return InventoryRowRightWidget(
                               item: item,
                               rackName: rackName,
                               categoryName: categoryName,
+                              distributorName: distributorName,
                               onTap: () => onEditItem(item),
                               onEdit: () => onEditItem(item),
                               onDelete: () => onDeleteItem(item.id),

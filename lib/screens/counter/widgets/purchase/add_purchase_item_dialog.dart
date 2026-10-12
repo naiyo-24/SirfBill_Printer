@@ -342,6 +342,8 @@ void showAddPurchaseItemDialog({
                                         ? hsnCtrl.text
                                         : '3004',
                                     'distributor_id': distributor['id'],
+                                    'distributor': distributor['name'],
+                                    'distributor_name': distributor['name'],
                                     'rack_id': selectedRackId,
                                     'category_id': selectedCategoryId,
                                   });
@@ -355,7 +357,7 @@ void showAddPurchaseItemDialog({
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                          'Medicine created & added to bill!',
+                                          'Item created & added to bill!',
                                         ),
                                         backgroundColor: Colors.green,
                                       ),

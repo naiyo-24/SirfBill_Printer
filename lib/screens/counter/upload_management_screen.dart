@@ -205,6 +205,13 @@ class _UploadManagementScreenState
         }
       }
 
+      final distList = ref.read(distributorsProvider).value ?? [];
+      final distMatch = distList.firstWhere(
+        (d) => d['id']?.toString() == _selectedDistributorId?.toString(),
+        orElse: () => null,
+      );
+      final distName = distMatch?['name']?.toString();
+
       await InventoryService.addItem({
         'name': _nameCtrl.text,
         'sku': _skuCtrl.text.isNotEmpty
@@ -223,6 +230,10 @@ class _UploadManagementScreenState
         'rack_id': _selectedRackId,
         'category_id': _selectedCategoryId,
         'distributor_id': _selectedDistributorId,
+        if (distName != null && distName.isNotEmpty) ...{
+          'distributor': distName,
+          'distributor_name': distName,
+        },
         'image_url': uploadedImageUrl,
       });
 
