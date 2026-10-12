@@ -1,0 +1,1082 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
+import '../../services/inventory_service.dart';
+import '../../services/export_service.dart';
+import '../../providers/counter_providers.dart';
+import '../../providers/distributor_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import '../../utils/responsive.dart';
+import '../../widgets/rack_dropdown.dart';
+import '../../widgets/category_dropdown.dart';
+import '../../widgets/distributor_dropdown.dart';
+
+class UploadManagementScreen extends ConsumerStatefulWidget {
+  const UploadManagementScreen({super.key});
+
+  @override
+  ConsumerState<UploadManagementScreen> createState() =>
+      _UploadManagementScreenState();
+}
+
+class _UploadManagementScreenState
+    extends ConsumerState<UploadManagementScreen> {
+  bool _isUploading = false;
+  final _nameCtrl = TextEditingController();
+  final _skuCtrl = TextEditingController();
+  final _expiryCtrl = TextEditingController();
+  final _manufacturerCtrl = TextEditingController();
+  final _stockCtrl = TextEditingController();
+  final _packSizeCtrl = TextEditingController(text: '1');
+  final _looseStockCtrl = TextEditingController(text: '0');
+  final _priceCtrl = TextEditingController(); // MRP/Selling Price
+  final _buyingPriceCtrl = TextEditingController(); // Buying Price
+  final _hsnCtrl = TextEditingController();
+  final _gstCtrl = TextEditingController(text: '0');
+  final _discountCtrl = TextEditingController(text: '0');
+  String? _selectedDistributorId;
+  String? _selectedRackId;
+  String? _selectedCategoryId;
+  PlatformFile? _selectedImage;
+
+  Future<void> _pickImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedImage = result.files.first;
+      });
+    }
+  }
+
+  Future<void> _uploadExcel() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx', 'xls', 'csv'],
+        withData: true,
+      );
+
+      if (result != null) {
+        final platformFile = result.files.single;
+        final bool hasBytes = platformFile.bytes != null;
+        final bool hasPath = !kIsWeb && platformFile.path != null;
+
+        if (hasBytes || hasPath) {
+          setState(() {
+            _isUploading = true;
+          });
+
+          final message = await InventoryService.uploadInventory(
+            filename: platformFile.name,
+            bytes: platformFile.bytes,
+            path: kIsWeb ? null : platformFile.path,
+          );
+
+          if (mounted) {
+            ref.invalidate(inventoryProvider);
+            ref.invalidate(categoryProvider);
+            ref.invalidate(rackProvider);
+            ref.invalidate(distributorsProvider);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  message,
+                  style: TextStyle(color: Theme.of(context).cardColor),
+                ),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Upload failed: $e',
+              style: TextStyle(color: Theme.of(context).cardColor),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
+    }
+  }
+
+  void _downloadTemplate() async {
+    final templateHeaders = [
+      'Name',
+      'SKU',
+      'Batch',
+      'Stock',
+      'Loose Stock',
+      'Pack Size',
+      'Buying Price (₹)',
+      'Unit Price (₹)',
+      'GST (%)',
+      'Discount (%)',
+      'Manufacturer',
+      'Expiry',
+      'Rack',
+      'Category',
+      'Distributor',
+      'HSN Code',
+    ];
+    await ExportService.exportHeadersToCSV(templateHeaders, 'inventory_upload_template');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Blank template downloaded successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  Widget _buildResponsiveRow(BuildContext context, List<Widget> children) {
+    if (!Responsive.isDesktop(context)) {
+      final List<Widget> columnChildren = [];
+      for (var child in children) {
+        if (child is Expanded) {
+          columnChildren.add(Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: child.child,
+          ));
+        } else if (child is Spacer) {
+          // ignore spacer
+        } else if (child is SizedBox && child.width != null) {
+          // ignore horizontal spacing
+        } else {
+          columnChildren.add(Padding(
+            padding: EdgeInsets.only(bottom: 16),
+            child: child,
+          ));
+        }
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: columnChildren,
+      );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
+  }
+
+  Widget _buildSectionHeader(IconData icon, String title, String subtitle) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: EdgeInsets.only(bottom: 24.0, top: 8.0),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Color(0xFFE8F5E9),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Color(0xFF22C55E), size: 20),
+          ),
+          SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: (isDark ? Colors.white : Color(0xFF1E293B)),
+                ),
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 12, color: (isDark ? Colors.grey.shade400 : Color(0xFF64748B))),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownWrapper(String label, Widget dropdown) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: (isDark ? Colors.white : const Color(0xFF1E293B)),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 40,
+          child: dropdown,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    String hint, {
+    bool isRequired = false,
+    IconData? suffixIcon,
+    TextEditingController? controller,
+    VoidCallback? onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: (isDark ? Colors.white : Color(0xFF1E293B)),
+              ),
+            ),
+            if (isRequired)
+              Text(
+                ' *',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        ),
+        SizedBox(height: 8),
+        SizedBox(
+          height: 40,
+          child: TextField(
+            controller: controller,
+            readOnly: onTap != null,
+            onTap: onTap,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: (isDark ? Colors.grey.shade500 : Color(0xFF94A3B8)),
+                fontSize: 12,
+              ),
+              suffixIcon: suffixIcon != null
+                  ? Icon(suffixIcon, color: (isDark ? Colors.grey.shade400 : Color(0xFF64748B)), size: 18)
+                  : null,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Color(0xFF22C55E)),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ignore: unused_element
+  Widget _buildDropdown(String label, String hint, {bool isRequired = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: (isDark ? Colors.white : Color(0xFF1E293B)),
+              ),
+            ),
+            if (isRequired)
+              Text(
+                ' *',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Container(
+          height: 40,
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            border: Border.all(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                hint,
+                style: TextStyle(color: (isDark ? Colors.grey.shade500 : Color(0xFF94A3B8)), fontSize: 12),
+              ),
+              Icon(
+                Icons.keyboard_arrow_down,
+                color: (isDark ? Colors.grey.shade400 : Color(0xFF64748B)),
+                size: 18,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      color: isDark ? Theme.of(context).scaffoldBackgroundColor : (isDark ? Colors.grey.shade900 : Color(0xFFF8FAFC)),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              border: Border(bottom: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0)))),
+            ),
+            child: !Responsive.isDesktop(context)
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => Navigator.pop(context),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.arrow_back, color: (isDark ? Colors.white : Color(0xFF1E293B)), size: 18),
+                                SizedBox(width: 4),
+                                Text('Back', style: TextStyle(color: (isDark ? Colors.white : Color(0xFF1E293B)), fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF22C55E),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.inventory_2, color: Colors.white, size: 20),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Add Item',
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: (isDark ? Colors.white : Color(0xFF1E293B))),
+                                ),
+                                Text(
+                                  'Add a new item to your inventory (Master DB)',
+                                  style: TextStyle(fontSize: 11, color: (isDark ? Colors.grey.shade400 : Color(0xFF64748B))),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      if (_isUploading)
+                        CircularProgressIndicator(color: Color(0xFF22C55E))
+                      else
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _downloadTemplate,
+                              icon: Icon(Icons.download, size: 18),
+                              label: Text('Download Template'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: (isDark ? Colors.grey.shade800 : Color(0xFFF1F5F9)),
+                                foregroundColor: (isDark ? Colors.white : Color(0xFF1E293B)),
+                                elevation: 0,
+                                side: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: _uploadExcel,
+                              icon: Icon(Icons.upload_file, size: 18, color: isDark ? Colors.black : Theme.of(context).cardColor),
+                              label: Text('Bulk Upload (Excel)'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: (isDark ? Colors.white : Color(0xFF1E293B)),
+                                foregroundColor: (isDark ? Colors.black : Theme.of(context).cardColor),
+                                elevation: 0,
+                              ),
+                            ),
+                            Tooltip(
+                              message: 'Refresh Categories and Racks',
+                              child: IconButton(
+                                onPressed: () {
+                                  ref.invalidate(categoryProvider);
+                                  ref.invalidate(rackProvider);
+                                },
+                                icon: Icon(Icons.refresh, color: (isDark ? Colors.white : Color(0xFF1E293B))),
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => Navigator.pop(context),
+                            child: Row(
+                              children: [
+                                Icon(Icons.arrow_back, color: (isDark ? Colors.white : Color(0xFF1E293B)), size: 18),
+                                SizedBox(width: 8),
+                                Text('Back', style: TextStyle(color: (isDark ? Colors.white : Color(0xFF1E293B)), fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 32),
+                          Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF22C55E),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.inventory_2, color: Colors.white, size: 24),
+                          ),
+                          SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Add Item',
+                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: (isDark ? Colors.white : Color(0xFF1E293B))),
+                              ),
+                              Text(
+                                'Add a new item to your inventory (Master DB)',
+                                style: TextStyle(fontSize: 12, color: (isDark ? Colors.grey.shade400 : Color(0xFF64748B))),
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 32),
+                          if (_isUploading)
+                            CircularProgressIndicator(color: Color(0xFF22C55E))
+                          else
+                            Row(
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: _downloadTemplate,
+                                  icon: Icon(Icons.download, size: 18),
+                                  label: Text('Download Template'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: (isDark ? Colors.grey.shade800 : Color(0xFFF1F5F9)),
+                                    foregroundColor: (isDark ? Colors.white : Color(0xFF1E293B)),
+                                    elevation: 0,
+                                    side: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                ElevatedButton.icon(
+                                  onPressed: _uploadExcel,
+                                  icon: Icon(Icons.upload_file, size: 18, color: isDark ? Colors.black : Theme.of(context).cardColor),
+                                  label: Text('Bulk Upload (Excel)'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: (isDark ? Colors.white : Color(0xFF1E293B)),
+                                    foregroundColor: (isDark ? Colors.black : Theme.of(context).cardColor),
+                                    elevation: 0,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Tooltip(
+                                  message: 'Refresh Categories and Racks',
+                                  child: IconButton(
+                                    onPressed: () {
+                                      ref.invalidate(categoryProvider);
+                                      ref.invalidate(rackProvider);
+                                    },
+                                    icon: Icon(Icons.refresh, color: (isDark ? Colors.white : Color(0xFF1E293B))),
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+          ),
+
+          // Form Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(32),
+              child: Column(
+                children: [
+                  // Basic Information Card
+                  Container(
+                    padding: EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          Icons.medication_liquid,
+                          'Basic Information',
+                          'General details about the item',
+                        ),
+                        _buildResponsiveRow(context, [
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                children: [
+                                  _buildResponsiveRow(context, [
+                                      Expanded(
+                                        child: _buildTextField(
+                                          'Item Name',
+                                          'e.g. Paracetamol 500mg',
+                                          isRequired: true,
+                                          controller: _nameCtrl,
+                                        ),
+                                      ),
+                                      SizedBox(width: 24),
+                                      Expanded(
+                                        child: _buildTextField(
+                                          'Manufacturer',
+                                          'e.g. Sun Pharma',
+                                          controller: _manufacturerCtrl,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Item Image',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: (isDark ? Colors.white : Color(0xFF1E293B)),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  InkWell(
+                                    onTap: _pickImage,
+                                    child: Container(
+                                      height: 100,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: (isDark ? Colors.grey.shade900 : Color(0xFFF8FAFC)),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0)),
+                                        ),
+                                      ),
+                                      child: _selectedImage != null
+                                          ? Stack(
+                                              fit: StackFit.expand,
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.memory(
+                                                    _selectedImage!.bytes!,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  right: 4,
+                                                  top: 4,
+                                                  child: InkWell(
+                                                    onTap: () => setState(
+                                                      () =>
+                                                          _selectedImage = null,
+                                                    ),
+                                                    child: Container(
+                                                      padding:
+                                                          EdgeInsets.all(
+                                                            4,
+                                                          ),
+                                                      decoration:
+                                                          BoxDecoration(
+                                                            color:
+                                                                Colors.black54,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                      child: Icon(
+                                                        Icons.close,
+                                                        color: Theme.of(context).cardColor,
+                                                        size: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.add_photo_alternate,
+                                                  color: (isDark ? Colors.grey.shade500 : Color(0xFF94A3B8)),
+                                                  size: 32,
+                                                ),
+                                                SizedBox(height: 8),
+                                                Text(
+                                                  'Upload Image',
+                                                  style: TextStyle(
+                                                    color: (isDark ? Colors.grey.shade400 : Color(0xFF64748B)),
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                        _buildResponsiveRow(context, [
+                            Expanded(
+                              child: _buildDropdownWrapper('Category', CategoryDropdown(
+                                selectedCategoryId: _selectedCategoryId,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedCategoryId = value;
+                                  });
+                                },
+                              )),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildDropdownWrapper('Distributor', DistributorDropdown(
+                                selectedDistributorId: _selectedDistributorId,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedDistributorId = value;
+                                  });
+                                },
+                              )),
+                            ),
+                          ],
+                        ),
+                        // SizedBox(height: 24),
+                        // Row(
+                        //   children: [
+                        //     Expanded(child: _buildTextField('Composition', 'e.g. Paracetamol 500mg')),
+                        //     SizedBox(width: 24),
+                        //     Expanded(child: _buildTextField('Pack Size', 'e.g. 10 Tablets')),
+                        //     SizedBox(width: 24),
+                        //     Expanded(child: _buildDropdown('Dosage Form', 'Select dosage form')),
+                        //   ],
+                        // ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 24),
+
+                  // Pricing & Stock Details Card
+                  Container(
+                    padding: EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          Icons.currency_rupee,
+                          'Pricing & Stock Details',
+                          'Set pricing and stock information',
+                        ),
+                        _buildResponsiveRow(context, [
+                            Expanded(
+                              child: _buildTextField(
+                                'Buying Price (₹)',
+                                '0.00',
+                                isRequired: true,
+                                controller: _buyingPriceCtrl,
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildTextField(
+                                'Selling Price/MRP (₹)',
+                                '0.00',
+                                isRequired: true,
+                                controller: _priceCtrl,
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildTextField(
+                                'Initial Stock (Packs)',
+                                '0',
+                                controller: _stockCtrl,
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildTextField(
+                                'Pieces/Pack',
+                                '1',
+                                controller: _packSizeCtrl,
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildTextField(
+                                'Loose Stock (Pieces)',
+                                '0',
+                                controller: _looseStockCtrl,
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildTextField(
+                                'GST (%)',
+                                '0',
+                                controller: _gstCtrl,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                        _buildResponsiveRow(context, [
+                            Expanded(
+                              child: _buildTextField(
+                                'Discount (%)',
+                                '0',
+                                controller: _discountCtrl,
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildDropdownWrapper('Rack / Location', RackDropdown(
+                                selectedRackId: _selectedRackId,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedRackId = value;
+                                  });
+                                },
+                              )),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                        _buildResponsiveRow(context, [
+                            // Expanded(child: _buildTextField('Minimum Stock Alert', '0')),
+
+                            Expanded(
+                              child: _buildTextField(
+                                'Expiry Date',
+                                'yyyy-mm-dd (Optional)',
+                                suffixIcon: Icons.calendar_today,
+                                controller: _expiryCtrl,
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2100),
+                                  );
+                                  if (picked != null) {
+                                    setState(() {
+                                      _expiryCtrl.text =
+                                          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: _buildTextField(
+                                'HSN Code',
+                                'e.g. 3004',
+                                controller: _hsnCtrl,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 24),
+
+                  // Additional Information Card
+                  Container(
+                    padding: EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          Icons.description,
+                          'Additional Information',
+                          'Optional details',
+                        ),
+                        _buildResponsiveRow(context, [
+                            Expanded(
+                              flex: 1,
+                              child: _buildTextField(
+                                'Barcode / SKU',
+                                'Scan or enter barcode',
+                                suffixIcon: Icons.qr_code_scanner,
+                                controller: _skuCtrl,
+                              ),
+                            ),
+                            Spacer(),
+                            // SizedBox(width: 24),
+                            // Expanded(
+                            //   flex: 1,
+                            //   child: _buildTextField('Storage Instructions', 'e.g. Keep in a cool, dry place'),
+                            // ),
+                            // SizedBox(width: 24),
+                            // Expanded(
+                            //   flex: 1,
+                            //   child: Column(
+                            //     crossAxisAlignment: CrossAxisAlignment.start,
+                            //     children: [
+                            //       Text('Notes', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: (isDark ? Colors.white : Color(0xFF1E293B)))),
+                            //       SizedBox(height: 8),
+                            //       TextField(
+                            //         maxLines: 3,
+                            //         decoration: InputDecoration(
+                            //           hintText: 'Additional notes (optional)',
+                            //           hintStyle: TextStyle(color: (isDark ? Colors.grey.shade500 : Color(0xFF94A3B8)), fontSize: 12),
+                            //           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0)))),
+                            //           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0)))),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Bottom Action Bar
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              border: Border(top: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0)))),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    side: BorderSide(color: (isDark ? Colors.grey.shade800 : Color(0xFFE2E8F0))),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: (isDark ? Colors.white : Color(0xFF1E293B)),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    if (_nameCtrl.text.isEmpty ||
+                        _priceCtrl.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Please fill all required fields.',
+                            style: TextStyle(color: Theme.of(context).cardColor),
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+                    try {
+                      setState(() => _isUploading = true);
+
+                      String? uploadedImageUrl;
+                      if (_selectedImage != null &&
+                          _selectedImage!.bytes != null) {
+                        try {
+                          uploadedImageUrl =
+                              await InventoryService.uploadItemImage(
+                                _selectedImage!.bytes!,
+                                _selectedImage!.name,
+                              );
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Failed to upload image: $e',
+                                  style: TextStyle(color: Theme.of(context).cardColor),
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            setState(() => _isUploading = false);
+                          }
+                          return;
+                        }
+                      }
+
+                      await InventoryService.addItem({
+                        'name': _nameCtrl.text,
+                        'sku': _skuCtrl.text.isNotEmpty
+                            ? _skuCtrl.text
+                            : DateTime.now().millisecondsSinceEpoch.toString(),
+                        'manufacturer': _manufacturerCtrl.text,
+                        'stock_quantity': int.tryParse(_stockCtrl.text) ?? 0,
+                        'pack_size': int.tryParse(_packSizeCtrl.text) ?? 1,
+                        'loose_stock': int.tryParse(_looseStockCtrl.text) ?? 0,
+                        'hsn_code': _hsnCtrl.text.isNotEmpty
+                            ? _hsnCtrl.text
+                            : '3004',
+                        'expiry_date': _expiryCtrl.text,
+                        'buying_price':
+                            double.tryParse(_buyingPriceCtrl.text) ?? 0.0,
+                        'unit_price': double.tryParse(_priceCtrl.text) ?? 0.0,
+                        'gst': double.tryParse(_gstCtrl.text) ?? 0.0,
+                        'discount': double.tryParse(_discountCtrl.text) ?? 0.0,
+                        'rack_id': _selectedRackId,
+                        'category_id': _selectedCategoryId,
+                        'distributor_id': _selectedDistributorId,
+                        'image_url': uploadedImageUrl,
+                      });
+                      if (context.mounted) {
+                        ref.invalidate(inventoryProvider);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Item added successfully!',
+                              style: TextStyle(color: Theme.of(context).cardColor),
+                            ),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                        Navigator.pop(context, true);
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              e.toString().replaceAll('Exception: ', ''),
+                              style: TextStyle(color: Theme.of(context).cardColor),
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    } finally {
+                      if (context.mounted) {
+                        setState(() => _isUploading = false);
+                      }
+                    }
+                  },
+                  icon: Icon(Icons.save, size: 18),
+                  label: Text(
+                    'Save Item',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF22C55E),
+                    foregroundColor: (isDark ? Colors.black : Theme.of(context).cardColor),
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

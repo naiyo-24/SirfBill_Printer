@@ -1,0 +1,463 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/theme_provider.dart';
+
+class DashboardScreen extends ConsumerWidget {
+  const DashboardScreen({super.key});
+
+  Widget _buildDashboardCard({
+    required BuildContext context,
+    required String title,
+    required String description,
+    required IconData icon,
+    required Color primaryColor,
+    required String nextRoute,
+    required bool isDark,
+    required String indexText,
+    bool isWeb = false,
+  }) {
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final descColor = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
+
+    return Container(
+      margin: EdgeInsets.only(bottom: isWeb ? 0 : 12),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: isDark
+            ? Border.all(color: primaryColor.withValues(alpha: 0.4), width: 1.5)
+            : null,
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: primaryColor.withValues(alpha: 0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () {
+            if (title == 'Lab Test' || title == 'CRM') {
+              showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  child: Container(
+                    width: 400,
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.rocket_launch_rounded,
+                          size: 48,
+                          color: primaryColor,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Coming Soon',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'The $title module is under development.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: descColor),
+                        ),
+                        const SizedBox(height: 32),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text('Got it'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              context.push(
+                '/role_login',
+                extra: {
+                  'roleName': title,
+                  'themeColor': primaryColor,
+                  'nextRoute': nextRoute,
+                },
+              );
+            }
+          },
+          child: Stack(
+            children: [
+              // Watermark number
+              Positioned(
+                top: 24,
+                right: 24,
+                child: Text(
+                  indexText,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isWeb ? 32 : 20,
+                  vertical: isWeb ? 40 : 24,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(icon, size: 24, color: primaryColor),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: textColor,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                description,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: descColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: primaryColor.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Open',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: isDark
+            ? const Color(0xFF0F172A)
+            : const Color(
+                0xFFE0F2FE, // Soft Tech Blue
+              ),
+        body: SafeArea(
+          child: CustomPaint(
+            painter: _DotGridPainter(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : const Color(0xFFBAE6FD),
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+              final isWeb = constraints.maxWidth > 800;
+
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Top App Bar Area (Toggle button right)
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isWeb ? 48.0 : 24.0,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              onPressed: () => ref
+                                  .read(themeProvider.notifier)
+                                  .toggleTheme(),
+                              icon: Icon(
+                                isDark ? Icons.light_mode : Icons.dark_mode,
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF1E293B),
+                                size: 24,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Main Content
+                      Transform.translate(
+                        offset: const Offset(0, -40), // Shift slightly upwards
+                        child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isWeb ? 64.0 : 24.0,
+                          vertical: 24.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Center(
+                              child: Image.asset(
+                                isDark
+                                    ? 'assets/LOGO_DM.png'
+                                    : 'assets/LOGO.png',
+                                height: isWeb ? 180 : 120,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, _, _) => const Icon(
+                                  Icons.print,
+                                  color: Color(0xFF0369A1),
+                                  size: 40,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+                            Center(
+                              child: Text(
+                                'WELCOME BACK!',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Center(
+                              child: RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF1E293B),
+                                  ),
+                                  children: const [
+                                    TextSpan(text: 'Select a '),
+                                    TextSpan(
+                                      text: 'Module',
+                                      style: TextStyle(
+                                        color: Color(0xFF0369A1),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Center(
+                              child: Text(
+                                'Choose a module to continue and manage your services',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+
+                            // Cards
+                            Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 400),
+                                child: _buildDashboardCard(
+                                  context: context,
+                                  title: 'Billing Counter',
+                                  description:
+                                      'Manage sales, billing, inventory.',
+                                  icon: Icons.point_of_sale_rounded,
+                                  primaryColor: const Color(0xFF0EA5E9),
+                                  nextRoute: '/counter/billing',
+                                  isDark: isDark,
+                                  indexText: '01',
+                                  isWeb: isWeb,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ), // Close Transform.translate
+
+                      // Footer
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Your Trusted Printing Partner',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF94A3B8),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.print_rounded,
+                                  size: 14,
+                                  color: Color(0xFF0EA5E9),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '© 2026 SirfBill Bill Karo, Befikar Raho.',
+                              style: TextStyle(
+                                color: isDark
+                                    ? const Color(0xFF64748B)
+                                    : const Color(0xFF94A3B8),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          ), // CustomPaint
+        ), // SafeArea
+      ), // Scaffold
+    ); // PopScope
+  }
+}
+
+class _DotGridPainter extends CustomPainter {
+  final Color color;
+
+  _DotGridPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    const double spacing = 20.0;
+    const double radius = 1.0;
+
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), radius, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DotGridPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
+}

@@ -1,0 +1,234 @@
+import 'package:flutter/material.dart';
+import 'sidebar_nav_item.dart';
+
+class CounterDashboardSidebar extends StatelessWidget {
+  final bool isDesktop;
+  final bool isExpanded;
+  final int currentIndex;
+  final ValueChanged<int> onSelectIndex;
+  final VoidCallback onToggleTheme;
+  final VoidCallback onLogout;
+
+  const CounterDashboardSidebar({
+    super.key,
+    required this.isDesktop,
+    required this.isExpanded,
+    required this.currentIndex,
+    required this.onSelectIndex,
+    required this.onToggleTheme,
+    required this.onLogout,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool expanded = isDesktop ? isExpanded : true;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sidebarBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF1E293B);
+
+    final navItems = const [
+      (Icons.receipt_long, 'Billing', 'F1'),
+      (Icons.inventory_2, 'Inventory', 'F2'),
+      (Icons.storefront, 'Shops', 'F3'),
+      (Icons.people, 'Customers', 'F4'),
+      (Icons.account_balance_wallet, 'Accounts', 'F5'),
+      (Icons.history, 'History', 'F6'),
+      (Icons.settings, 'Settings', 'F7'),
+      (Icons.local_shipping, 'Distributors', 'F8'),
+    ];
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: isDesktop ? (expanded ? 260 : 80) : null,
+      decoration: BoxDecoration(
+        color: sidebarBg,
+        border: Border(right: BorderSide(color: borderColor, width: 1)),
+      ),
+      child: ClipRect(
+        child: SafeArea(
+          top: !isDesktop,
+          bottom: !isDesktop,
+          child: Column(
+            crossAxisAlignment: expanded
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(expanded ? 24.0 : 16.0),
+                child: AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 200),
+                  crossFadeState: expanded
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  alignment: Alignment.centerLeft,
+                  firstChild: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: SizedBox(
+                      width: 212,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Counter Module',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: textColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Manage your print shop operations',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: subtitleColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  secondChild: const Center(
+                    child: Icon(
+                      Icons.print,
+                      color: Color(0xFF166534),
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ),
+
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (int i = 0; i < navItems.length; i++)
+                        SidebarNavItem(
+                          icon: navItems[i].$1,
+                          label: navItems[i].$2,
+                          shortcut: navItems[i].$3,
+                          isSelected: currentIndex == i,
+                          isExpanded: expanded,
+                          isDesktop: isDesktop,
+                          onTap: () => onSelectIndex(i),
+                        ),
+
+                      const SizedBox(height: 16),
+                      const Divider(
+                        color: Color(0xFFE2E8F0),
+                        thickness: 1,
+                        indent: 16,
+                        endIndent: 16,
+                      ),
+                      const SizedBox(height: 8),
+
+                      SidebarNavItem(
+                        icon: isDark ? Icons.light_mode : Icons.dark_mode,
+                        label: isDark ? 'Light Mode' : 'Dark Mode',
+                        isExpanded: expanded,
+                        isDesktop: isDesktop,
+                        customTextColor: subtitleColor,
+                        customIconColor: subtitleColor,
+                        onTap: onToggleTheme,
+                      ),
+
+                      SidebarNavItem(
+                        icon: Icons.logout,
+                        label: 'Logout',
+                        isExpanded: expanded,
+                        isDesktop: isDesktop,
+                        customTextColor: Colors.red,
+                        customIconColor: Colors.red,
+                        onTap: onLogout,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Bottom Sidebar Card
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 200),
+                crossFadeState: expanded
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                alignment: Alignment.bottomCenter,
+                firstChild: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    width: isDesktop ? 228 : double.infinity,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.3 : 0.12,
+                          ),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.eco, color: Color(0xFF22C55E)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Better Care',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: textColor,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                'Brighter Tomorrow',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: subtitleColor,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                secondChild: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: Icon(Icons.eco, color: Color(0xFF22C55E), size: 24),
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: EdgeInsets.all(expanded ? 24.0 : 16.0),
+                child: Center(
+                  child: Text(
+                    expanded ? 'Version 1.0.0' : 'v1',
+                    style: TextStyle(fontSize: 10, color: subtitleColor),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
