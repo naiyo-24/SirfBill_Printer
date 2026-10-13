@@ -347,15 +347,9 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
 
       final String invoiceNo = _generateInvoiceNo();
 
-      final checkoutItems = _currentBill.where((item) {
-        final id = item['inventory_item_id']?.toString() ?? '';
-        final isCustom = item['is_custom'] == true || id.startsWith('custom_') || id.isEmpty;
-        return !isCustom;
-      }).toList();
-
-      if (checkoutItems.isNotEmpty) {
+      if (_currentBill.isNotEmpty) {
         await BillingService.checkout(
-          items: checkoutItems,
+          items: _currentBill,
           totalAmount: _grandTotal,
           customerId: _savedCustomerId,
           customerName: _customerNameController.text.isNotEmpty
@@ -371,8 +365,6 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
 
       ref.invalidate(inventoryProvider);
       ref.invalidate(billingInventoryProvider);
-      ref.invalidate(historyProvider);
-      ref.invalidate(accountsProvider);
       ref.invalidate(customerProvider);
 
       final pdfBytes = await PdfGenerator.generateBill(
@@ -447,6 +439,9 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
       } catch (e) {
         debugPrint('Error recording transaction in Accounts: $e');
       }
+
+      ref.invalidate(historyProvider);
+      ref.invalidate(accountsProvider);
 
       _clearCart();
 

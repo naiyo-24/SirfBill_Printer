@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../services/transaction_service.dart';
 import '../services/account_service.dart';
 import '../services/accounting_extended_service.dart';
+import '../services/billing_service.dart';
 import '../providers/counter_providers.dart';
 
 class AccountsState {
@@ -84,6 +85,59 @@ class AccountsNotifier extends AsyncNotifier<AccountsState> {
     String searchQuery = '',
   }) async {
     final allTxns = await TransactionService.getTransactions(shopId: shopId);
+
+    // Sync POS sales from POS History into Accounts transactions
+    try {
+      final posHistory = await BillingService.getPosHistory();
+      final historyList = posHistory['history'] as List? ?? [];
+      final existingDescriptions = allTxns.map((t) => t.description.toLowerCase()).toSet();
+
+      for (var item in historyList) {
+        final billNo = item['bill_no']?.toString() ?? '';
+        final custName = item['customer_name']?.toString() ?? 'Walk-in';
+        final description = 'Sale - Invoice #$billNo ($custName)';
+
+        // Only add if not already in the transactions list
+        final alreadyExists = existingDescriptions.any((desc) => desc.contains(billNo.toLowerCase()));
+        if (!alreadyExists && billNo.isNotEmpty) {
+          existingDescriptions.add(description.toLowerCase());
+          String dateStr = item['date']?.toString() ?? '';
+          dateStr = dateStr.replaceAll(' ', 'T');
+          if (dateStr.endsWith('Z')) {
+            dateStr = dateStr.substring(0, dateStr.length - 1);
+          }
+          final dt = (DateTime.tryParse(dateStr) ?? DateTime.now()).toLocal();
+          
+          allTxns.add(
+            TransactionModel(
+              id: 'pos_${item['id'] ?? billNo}',
+              date: DateFormat('dd MMM yyyy').format(dt),
+              time: DateFormat('hh:mm a').format(dt),
+              type: 'Income',
+              category: 'Sales',
+              description: description,
+              amount: (item['amount'] as num?)?.toDouble() ?? 0.0,
+              paymentMode: item['payment_mode']?.toString() ?? 'Cash',
+              tenantId: shopId,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // In case POS history fails, proceed with transactions
+    }
+
+    // Sort all transactions newest first
+    final DateFormat dateFmt = DateFormat('dd MMM yyyy');
+    allTxns.sort((a, b) {
+      try {
+        final dA = dateFmt.parse(a.date);
+        final dB = dateFmt.parse(b.date);
+        return dB.compareTo(dA);
+      } catch (_) {
+        return 0;
+      }
+    });
 
     // Dynamically build category list from all transactions
     final Set<String> catSet = {};
