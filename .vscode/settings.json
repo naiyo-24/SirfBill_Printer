@@ -1,3 +1,5 @@
 {
-  "C_Cpp.errorSquiggles": "disabled"
+  "C_Cpp.errorSquiggles": "disabled",
+  "yaml.schemaStore.enable": false,
+  "json.schemaDownload.enable": false
 }
