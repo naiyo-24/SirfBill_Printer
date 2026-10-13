@@ -46,6 +46,8 @@ class ApiClient {
             'API Error [${e.response?.statusCode}]: ${e.requestOptions.path}',
           );
           // ignore: avoid_print
+          print('Response Data: ${e.response?.data}');
+          // ignore: avoid_print
           print('Message: ${e.message}');
 
           if (e.response?.statusCode == 401 && !e.requestOptions.path.contains('auth')) {

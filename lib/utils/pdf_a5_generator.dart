@@ -299,22 +299,6 @@ class PdfA5Generator {
                   ),
               ],
             ),
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                pw.Text(
-                  'Referred By:',
-                  style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
-                ),
-                pw.Text(
-                  doctorName ?? 'Walk-in',
-                  style: pw.TextStyle(
-                    fontSize: 9,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ],

@@ -22,10 +22,8 @@ class HistoryNotifier extends AsyncNotifier<HistoryState> {
 
     final historyList = response['history'] as List? ?? [];
 
-    final transactions = historyList.map((item) {
+    final serverTransactions = historyList.map((item) {
       String dateStr = item['date'].toString();
-      // Remove Z if we know the backend returns local time, or just let DateTime parse it
-      // Replace space with T to ensure standard ISO8601 parsing
       dateStr = dateStr.replaceAll(' ', 'T');
       if (dateStr.endsWith('Z')) {
         dateStr = dateStr.substring(0, dateStr.length - 1);
@@ -37,15 +35,26 @@ class HistoryNotifier extends AsyncNotifier<HistoryState> {
               ?.map((i) => Map<String, dynamic>.from(i))
               .toList() ??
           [];
-      // Normalize backend fields to match what PdfGenerator expects
       final itemsList = rawItemsList.map((i) {
         final double price = (i['mrp'] as num?)?.toDouble() ??
-            (i['price'] as num?)?.toDouble() ?? 0.0;
-        final int qty = (i['qty'] as num?)?.toInt() ?? 1;
+            (i['price'] as num?)?.toDouble() ??
+            (i['unit_price'] as num?)?.toDouble() ??
+            0.0;
+        final int qty = (i['qty'] as num?)?.toInt() ??
+            (i['quantity'] as num?)?.toInt() ??
+            1;
+        final itemName = i['name'] ?? i['item_name'] ?? 'Custom Item';
+        final sku = i['sku'] ?? (i['inventory_item_id'] == null ? 'CUSTOM' : '-');
+        final brand = i['brand'] ?? (i['inventory_item_id'] == null ? 'Custom Item' : '-');
         return <String, dynamic>{
-          'name': i['name'] ?? 'Unknown Item',
+          'name': itemName,
+          'item_name': itemName,
+          'sku': sku,
+          'brand': brand,
           'qty': qty,
+          'quantity': qty,
           'price': price,
+          'unit_price': price,
           'mrp': price,
           'total': (i['total'] as num?)?.toDouble() ?? price * qty,
           'batch': i['batch']?.toString() ?? '-',
@@ -66,7 +75,6 @@ class HistoryNotifier extends AsyncNotifier<HistoryState> {
           ? calculatedSubtotal - grandTotalVal
           : 0.0;
 
-      // Normalize types and payment modes
       String rawType = item['type'] ?? 'Sale';
       if (rawType == 'POS Sale') rawType = 'Sale';
       
@@ -110,8 +118,48 @@ class HistoryNotifier extends AsyncNotifier<HistoryState> {
       };
     }).toList();
 
+    // Also include local saved bills (e.g. bills with custom items)
+    final localBills = await BillingHistoryService.getBillingHistory();
+    final List<Map<String, dynamic>> combinedTransactions = List.from(serverTransactions);
+    final Set<String> existingInvoiceNos = serverTransactions
+        .map((t) => t['refNo']?.toString() ?? '')
+        .where((ref) => ref.isNotEmpty)
+        .toSet();
+
+    for (final bill in localBills) {
+      if (!existingInvoiceNos.contains(bill.invoiceNo)) {
+        existingInvoiceNos.add(bill.invoiceNo);
+        String rawPayment = bill.paymentMode;
+        if (rawPayment.toUpperCase() == 'CASH') rawPayment = 'Cash';
+        if (rawPayment.toUpperCase() == 'CARD') rawPayment = 'Card';
+        if (rawPayment.toUpperCase() == 'UPI') rawPayment = 'UPI';
+
+        combinedTransactions.add({
+          'date': DateFormat('dd MMM yyyy').format(bill.createdAt),
+          'time': DateFormat('hh:mm a').format(bill.createdAt),
+          'createdAtDate': bill.createdAt,
+          'refNo': bill.invoiceNo,
+          'customerName': bill.customerName.isEmpty ? 'Walk-in' : bill.customerName,
+          'customerPhone': bill.customerPhone,
+          'type': 'Sale',
+          'items': bill.items.length,
+          'amount': bill.grandTotal,
+          'paymentMode': rawPayment,
+          'status': 'Completed',
+          'originalBill': bill,
+        });
+      }
+    }
+
+    // Sort combined by createdAtDate descending (newest first)
+    combinedTransactions.sort((a, b) {
+      final dtA = a['createdAtDate'] as DateTime? ?? DateTime(2000);
+      final dtB = b['createdAtDate'] as DateTime? ?? DateTime(2000);
+      return dtB.compareTo(dtA);
+    });
+
     return HistoryState(
-      transactions: transactions.cast<Map<String, dynamic>>(),
+      transactions: combinedTransactions,
       summary: Map<String, dynamic>.from(response['summary'] ?? {}),
     );
   }

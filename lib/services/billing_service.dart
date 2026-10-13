@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../config/api_client.dart';
 import 'inventory_service.dart';
 
@@ -21,10 +22,20 @@ class BillingService {
         'tenant_id': shopId,
         'items': items
             .map(
-              (item) => {
-                'inventory_item_id': item['inventory_item_id'],
-                'quantity': item['qty'],
-                'is_loose': item['is_loose'] ?? false,
+              (item) {
+                final rawInvId = item['inventory_item_id']?.toString();
+                final isCustom = rawInvId == null ||
+                    rawInvId.startsWith('custom_') ||
+                    (item['is_custom'] == true);
+                return {
+                  'inventory_item_id': isCustom ? null : item['inventory_item_id'],
+                  'item_name': item['name'] ?? item['item_name'] ?? 'Custom Item',
+                  'unit_price': (item['price'] ?? item['unit_price'] ?? item['mrp'] ?? 0.0).toDouble(),
+                  'quantity': item['qty'] ?? item['quantity'] ?? 1,
+                  'is_loose': item['is_loose'] ?? false,
+                  'discount': (item['discount'] ?? item['disc'] ?? 0.0).toDouble(),
+                  'gst': (item['gst'] ?? 0.0).toDouble(),
+                };
               },
             )
             .toList(),
@@ -61,6 +72,12 @@ class BillingService {
       } else {
         throw Exception('Checkout failed: ${response.data}');
       }
+    } on DioException catch (e) {
+      final resData = e.response?.data;
+      if (resData != null) {
+        throw Exception('Validation error: $resData');
+      }
+      throw Exception('Network error during checkout: ${e.message}');
     } catch (e) {
       throw Exception('Error during checkout: $e');
     }

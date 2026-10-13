@@ -203,25 +203,6 @@ class PdfA4Generator {
                         ),
                     ],
                   ),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.end,
-                    children: [
-                      pw.Text(
-                        'Referred By:',
-                        style: pw.TextStyle(
-                          fontSize: format == 'A4' ? 10 : 8,
-                          color: PdfColors.grey700,
-                        ),
-                      ),
-                      pw.Text(
-                        doctorName ?? 'Walk-in',
-                        style: pw.TextStyle(
-                          fontSize: format == 'A4' ? 12 : 10,
-                          fontWeight: pw.FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
               pw.SizedBox(height: format == 'A4' ? 16 : 8),

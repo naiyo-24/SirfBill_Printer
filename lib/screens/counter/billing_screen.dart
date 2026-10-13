@@ -10,6 +10,7 @@ import '../../services/customer_service.dart';
 import '../../services/billing_service.dart';
 import '../../services/draft_service.dart';
 import '../../services/billing_history_service.dart';
+import '../../services/transaction_service.dart';
 import '../../utils/pdf_generator.dart';
 import '../../services/shop_settings_service.dart';
 import '../../providers/billing_provider.dart';
@@ -346,9 +347,11 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
 
       final String invoiceNo = _generateInvoiceNo();
 
-      final checkoutItems = _currentBill
-          .where((item) => item['inventory_item_id'] != null)
-          .toList();
+      final checkoutItems = _currentBill.where((item) {
+        final id = item['inventory_item_id']?.toString() ?? '';
+        final isCustom = item['is_custom'] == true || id.startsWith('custom_') || id.isEmpty;
+        return !isCustom;
+      }).toList();
 
       if (checkoutItems.isNotEmpty) {
         await BillingService.checkout(
@@ -428,6 +431,22 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
           format: ref.read(billingProvider).selectedFormat,
         ),
       );
+
+      // Record sale in Accounts
+      try {
+        final paymentMethod = ref.read(billingProvider).paymentMethod;
+        await TransactionService.saveTransaction({
+          "date": DateTime.now().toUtc().toIso8601String(),
+          "amount": _grandTotal,
+          "transaction_type": "INCOME",
+          "description": "Sale - Invoice #$invoiceNo (${_customerNameController.text.isNotEmpty ? _customerNameController.text : 'Walk-in'})",
+          "category_name": "Sales",
+          "category": "Sales",
+          "payment_mode": paymentMethod,
+        });
+      } catch (e) {
+        debugPrint('Error recording transaction in Accounts: $e');
+      }
 
       _clearCart();
 
