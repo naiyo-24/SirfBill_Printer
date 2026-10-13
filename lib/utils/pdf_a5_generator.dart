@@ -39,6 +39,7 @@ class PdfA5Generator {
     required String acHolder,
     required String acNumber,
     required String ifsc,
+    String upiId = '',
     required String term1,
     required String term2,
     required String term3,
@@ -112,6 +113,9 @@ class PdfA5Generator {
                     acHolder: acHolder,
                     acNumber: acNumber,
                     ifsc: ifsc,
+                    upiId: upiId,
+                    shopName: shopName,
+                    invoiceNumber: invoiceNumber,
                     primaryGreen: primaryGreen,
                   ),
 
@@ -437,6 +441,9 @@ class PdfA5Generator {
     required String acHolder,
     required String acNumber,
     required String ifsc,
+    String upiId = '',
+    String shopName = '',
+    String invoiceNumber = '',
     required PdfColor primaryGreen,
   }) {
     return pw.Column(
@@ -470,13 +477,35 @@ class PdfA5Generator {
                         pw.Text('A/C Name: $acHolder', style: const pw.TextStyle(fontSize: 7)),
                         pw.Text('A/C No: $acNumber', style: const pw.TextStyle(fontSize: 7)),
                         pw.Text('IFSC: $ifsc', style: const pw.TextStyle(fontSize: 7)),
+                        if (upiId.isNotEmpty)
+                          pw.Text('UPI: $upiId', style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold)),
                       ],
                     ),
                   ),
                   pw.Container(
                     padding: const pw.EdgeInsets.all(4),
                     child: pw.Center(
-                      child: qrImage != null ? pw.Image(qrImage, width: 60, height: 60) : pw.SizedBox(),
+                      child: upiId.isNotEmpty
+                          ? pw.Column(
+                              mainAxisAlignment: pw.MainAxisAlignment.center,
+                              children: [
+                                pw.BarcodeWidget(
+                                  barcode: pw.Barcode.qrCode(),
+                                  data: 'upi://pay?pa=$upiId&pn=${Uri.encodeComponent(shopName)}&am=${roundedTotal.toStringAsFixed(2)}&cu=INR&tn=${Uri.encodeComponent("Bill $invoiceNumber")}',
+                                  width: 55,
+                                  height: 55,
+                                ),
+                                pw.SizedBox(height: 1),
+                                pw.Text(
+                                  '₹${roundedTotal.toStringAsFixed(2)}',
+                                  style: pw.TextStyle(
+                                    fontSize: 6,
+                                    fontWeight: pw.FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : (qrImage != null ? pw.Image(qrImage, width: 60, height: 60) : pw.SizedBox()),
                     ),
                   ),
                   pw.Container(

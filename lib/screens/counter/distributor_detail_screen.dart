@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../providers/distributor_provider.dart';
 import '../../providers/counter_providers.dart';
 import '../../config/api_constants.dart';
+import '../../services/account_service.dart';
 import 'package:go_router/go_router.dart';
 
 class DistributorDetailScreen extends ConsumerWidget {
@@ -392,6 +393,100 @@ class DistributorDetailScreen extends ConsumerWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF166534)),
               onPressed: () async {
+                final billTotal = (bill['total_amount'] as num?)?.toDouble() ?? 0.0;
+                final amountPaid = (bill['amount_paid'] as num?)?.toDouble() ?? 0.0;
+                final dueAmount = (billTotal - amountPaid) > 0 ? (billTotal - amountPaid) : billTotal;
+
+                List<AccountModel> accounts = [];
+                try {
+                  accounts = await AccountService.getAccounts();
+                } catch (_) {}
+
+                final assetAccounts = accounts
+                    .where((a) => a.accountType.toUpperCase() == 'ASSET')
+                    .toList();
+                final totalFunds = assetAccounts.fold<double>(
+                  0.0,
+                  (sum, acc) => sum + acc.balance,
+                );
+
+                if (assetAccounts.isEmpty || totalFunds < dueAmount) {
+                  if (context.mounted) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 52),
+                        title: const Text('No Money in Accounts Section', style: TextStyle(fontWeight: FontWeight.bold)),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'There is not enough money in the accounts section to pay this purchase bill.',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Theme.of(context).dividerColor),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Bill Due Amount:'),
+                                      Text('₹${dueAmount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Available in Accounts:'),
+                                      Text('₹${totalFunds.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                                    ],
+                                  ),
+                                  const Divider(height: 16),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Shortage:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      Text('₹${(dueAmount - totalFunds).clamp(0.0, double.infinity).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            const Text(
+                              'Please deposit money into Accounts first before marking this purchase bill as paid.',
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF166534),
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('Understood'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return;
+                }
+
                 try {
                   // Call service to pay bill
                   final svc = ref.read(purchaseServiceProvider);
@@ -405,13 +500,27 @@ class DistributorDetailScreen extends ConsumerWidget {
                   if (context.mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Bill marked as PAID!'), backgroundColor: Colors.green),
+                      const SnackBar(content: Text('Bill marked as PAID! Deducted from Accounts.'), backgroundColor: Colors.green),
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        icon: const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                        title: const Text('Payment Failed'),
+                        content: Text(
+                          e.toString().replaceFirst('Exception: ', ''),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
                     );
                   }
                 }

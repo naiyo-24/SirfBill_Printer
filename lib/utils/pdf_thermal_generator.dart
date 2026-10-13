@@ -22,6 +22,7 @@ class PdfThermalGenerator {
     required String shopGstNo,
     String cinNumber = '',
     String drugLicence = '',
+    String upiId = '',
     pw.ImageProvider? logoImage,
     pw.ImageProvider? qrImage,
     DateTime? billingDate,
@@ -127,9 +128,12 @@ class PdfThermalGenerator {
               // Thermal Items Table
               pw.Table(
                 columnWidths: {
-                  0: const pw.FlexColumnWidth(3),
-                  1: const pw.FlexColumnWidth(1),
-                  2: const pw.FlexColumnWidth(1.5),
+                  0: const pw.FlexColumnWidth(2.6), // Item
+                  1: const pw.FlexColumnWidth(0.8), // Qty
+                  2: const pw.FlexColumnWidth(1.1), // Rate
+                  3: const pw.FlexColumnWidth(0.9), // Disc%
+                  4: const pw.FlexColumnWidth(0.9), // GST%
+                  5: const pw.FlexColumnWidth(1.3), // Amount
                 },
                 children: [
                   pw.TableRow(
@@ -137,14 +141,38 @@ class PdfThermalGenerator {
                       pw.Text(
                         'Item',
                         style: pw.TextStyle(
-                          fontSize: 8,
+                          fontSize: 7.5,
                           fontWeight: pw.FontWeight.bold,
                         ),
                       ),
                       pw.Text(
                         'Qty',
                         style: pw.TextStyle(
-                          fontSize: 8,
+                          fontSize: 7.5,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                      pw.Text(
+                        'Rate',
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                        textAlign: pw.TextAlign.right,
+                      ),
+                      pw.Text(
+                        'Disc',
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                      pw.Text(
+                        'GST',
+                        style: pw.TextStyle(
+                          fontSize: 7.5,
                           fontWeight: pw.FontWeight.bold,
                         ),
                         textAlign: pw.TextAlign.center,
@@ -152,7 +180,7 @@ class PdfThermalGenerator {
                       pw.Text(
                         'Amt',
                         style: pw.TextStyle(
-                          fontSize: 8,
+                          fontSize: 7.5,
                           fontWeight: pw.FontWeight.bold,
                         ),
                         textAlign: pw.TextAlign.right,
@@ -160,33 +188,92 @@ class PdfThermalGenerator {
                     ],
                   ),
                   ...items.map(
-                    (item) => pw.TableRow(
-                      children: [
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(2),
-                          child: pw.Text(
-                            item['name'] ?? 'Unknown Item',
-                            style: const pw.TextStyle(fontSize: 8),
+                    (item) {
+                      double parseNum(dynamic val) {
+                        if (val == null) return 0.0;
+                        if (val is num) return val.toDouble();
+                        if (val is String) return double.tryParse(val) ?? 0.0;
+                        return 0.0;
+                      }
+
+                      final double rate = parseNum(item['price'] ?? item['mrp'] ?? item['unit_price']);
+                      final double disc = parseNum(item['discount']);
+                      final double cgst = parseNum(item['cgst']);
+                      final double sgst = parseNum(item['sgst']);
+                      double gst = parseNum(item['gst']);
+                      if (gst == 0.0 && (cgst > 0.0 || sgst > 0.0)) {
+                        gst = cgst + sgst;
+                      }
+                      final double total = parseNum(item['total']);
+
+                      // If item gst wasn't specified, but bill has tax
+                      if (gst == 0.0 && subtotal > 0 && tax > 0) {
+                        final taxableBase = subtotal - discount;
+                        if (taxableBase > 0) {
+                          gst = (tax / taxableBase) * 100;
+                        }
+                      }
+
+                      // Only show per-product discount in the row; total discount is shown at the bottom
+                      final String discText = disc > 0
+                          ? '${disc % 1 == 0 ? disc.toInt() : disc.toStringAsFixed(1)}%'
+                          : '0%';
+                      final String gstText = gst > 0
+                          ? '${gst % 1 == 0 ? gst.toInt() : gst.toStringAsFixed(1)}%'
+                          : '0%';
+
+                      return pw.TableRow(
+                        children: [
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                            child: pw.Text(
+                              item['name'] ?? 'Unknown Item',
+                              style: const pw.TextStyle(fontSize: 7),
+                            ),
                           ),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(2),
-                          child: pw.Text(
-                            FormatUtils.formatQty(item),
-                            style: const pw.TextStyle(fontSize: 8),
-                            textAlign: pw.TextAlign.center,
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                            child: pw.Text(
+                              FormatUtils.formatQty(item),
+                              style: const pw.TextStyle(fontSize: 7),
+                              textAlign: pw.TextAlign.center,
+                            ),
                           ),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.all(2),
-                          child: pw.Text(
-                            (item['total'] ?? 0.0).toStringAsFixed(2),
-                            style: const pw.TextStyle(fontSize: 8),
-                            textAlign: pw.TextAlign.right,
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                            child: pw.Text(
+                              rate.toStringAsFixed(2),
+                              style: const pw.TextStyle(fontSize: 7),
+                              textAlign: pw.TextAlign.right,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                            child: pw.Text(
+                              discText,
+                              style: const pw.TextStyle(fontSize: 7),
+                              textAlign: pw.TextAlign.center,
+                            ),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                            child: pw.Text(
+                              gstText,
+                              style: const pw.TextStyle(fontSize: 7),
+                              textAlign: pw.TextAlign.center,
+                            ),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.symmetric(vertical: 2, horizontal: 1),
+                            child: pw.Text(
+                              total.toStringAsFixed(2),
+                              style: const pw.TextStyle(fontSize: 7),
+                              textAlign: pw.TextAlign.right,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -235,6 +322,41 @@ class PdfThermalGenerator {
                   ),
                 ],
               ),
+              if (tax > 0) ...[
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(left: 6, top: 2, bottom: 2),
+                  child: pw.Column(
+                    children: [
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            '  CGST:',
+                            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+                          ),
+                          pw.Text(
+                            (tax / 2).toStringAsFixed(2),
+                            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+                          ),
+                        ],
+                      ),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            '  SGST:',
+                            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+                          ),
+                          pw.Text(
+                            (tax / 2).toStringAsFixed(2),
+                            style: const pw.TextStyle(fontSize: 7, color: PdfColors.grey700),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -255,8 +377,32 @@ class PdfThermalGenerator {
                 ],
               ),
               pw.SizedBox(height: 10),
-              if (qrImage != null)
+              if (upiId.isNotEmpty) ...[
+                pw.Text(
+                  'Scan to Pay (UPI)',
+                  style: pw.TextStyle(
+                    fontSize: 8,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 4),
+                pw.BarcodeWidget(
+                  barcode: pw.Barcode.qrCode(),
+                  data: 'upi://pay?pa=$upiId&pn=${Uri.encodeComponent(shopName)}&am=${roundedTotal.toStringAsFixed(2)}&cu=INR&tn=${Uri.encodeComponent("Bill $invoiceNumber")}',
+                  width: 70,
+                  height: 70,
+                ),
+                pw.SizedBox(height: 2),
+                pw.Text(
+                  '₹${roundedTotal.toStringAsFixed(2)}',
+                  style: pw.TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ] else if (qrImage != null) ...[
                 pw.Container(width: 60, height: 60, child: pw.Image(qrImage)),
+              ],
               pw.SizedBox(height: 10),
               pw.Text(
                 'Thank you! Visit Again.',

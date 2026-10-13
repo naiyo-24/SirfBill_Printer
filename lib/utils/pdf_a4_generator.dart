@@ -34,6 +34,7 @@ class PdfA4Generator {
     required String acHolder,
     required String acNumber,
     required String ifsc,
+    String upiId = '',
     required String term1,
     required String term2,
     required String term3,
@@ -488,10 +489,31 @@ class PdfA4Generator {
                                       pw.Text('A/C Name: $acHolder', style: pw.TextStyle(fontSize: format == 'A4' ? 8 : 7)),
                                       pw.Text('A/C No: $acNumber', style: pw.TextStyle(fontSize: format == 'A4' ? 8 : 7)),
                                       pw.Text('IFSC: $ifsc', style: pw.TextStyle(fontSize: format == 'A4' ? 8 : 7)),
+                                      if (upiId.isNotEmpty)
+                                        pw.Text('UPI: $upiId', style: pw.TextStyle(fontSize: format == 'A4' ? 8 : 7, fontWeight: pw.FontWeight.bold)),
                                     ],
                                   ),
                                 ),
-                                if (qrImage != null)
+                                if (upiId.isNotEmpty)
+                                  pw.Column(
+                                    children: [
+                                      pw.BarcodeWidget(
+                                        barcode: pw.Barcode.qrCode(),
+                                        data: 'upi://pay?pa=$upiId&pn=${Uri.encodeComponent(shopName)}&am=${roundedTotal.toStringAsFixed(2)}&cu=INR&tn=${Uri.encodeComponent("Bill $invoiceNumber")}',
+                                        width: format == 'A4' ? 65 : 45,
+                                        height: format == 'A4' ? 65 : 45,
+                                      ),
+                                      pw.SizedBox(height: 2),
+                                      pw.Text(
+                                        '₹${roundedTotal.toStringAsFixed(2)}',
+                                        style: pw.TextStyle(
+                                          fontSize: format == 'A4' ? 7 : 6,
+                                          fontWeight: pw.FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                else if (qrImage != null)
                                   pw.Container(
                                     width: format == 'A4' ? 70 : 50,
                                     height: format == 'A4' ? 70 : 50,

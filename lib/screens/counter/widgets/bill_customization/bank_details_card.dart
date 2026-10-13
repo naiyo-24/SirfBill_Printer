@@ -7,6 +7,7 @@ class BankDetailsCard extends StatelessWidget {
   final TextEditingController acHolderCtrl;
   final TextEditingController acNumberCtrl;
   final TextEditingController ifscCtrl;
+  final TextEditingController upiIdCtrl;
 
   const BankDetailsCard({
     super.key,
@@ -15,6 +16,7 @@ class BankDetailsCard extends StatelessWidget {
     required this.acHolderCtrl,
     required this.acNumberCtrl,
     required this.ifscCtrl,
+    required this.upiIdCtrl,
   });
 
   @override
@@ -68,6 +70,11 @@ class BankDetailsCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            CustomizationTextField(
+              label: 'UPI ID (For Dynamic Payment QR)',
+              controller: upiIdCtrl,
+              hintText: 'e.g. 9876543210@paytm or shop@okhdfcbank',
             ),
           ],
         ),

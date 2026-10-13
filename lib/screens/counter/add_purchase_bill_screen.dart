@@ -7,6 +7,7 @@ import '../../services/purchase_service.dart';
 import '../../config/api_constants.dart';
 import '../../services/inventory_service.dart';
 import '../../providers/distributor_provider.dart';
+import '../../services/account_service.dart';
 
 import 'widgets/purchase/add_purchase_item_dialog.dart';
 import 'widgets/purchase/purchase_search_panel.dart';
@@ -107,6 +108,114 @@ class _AddPurchaseBillScreenState extends ConsumerState<AddPurchaseBillScreen> {
     try {
       final shopId = await InventoryService.getShopId();
       double totalAmount = _grandTotal;
+      final amountPaid = _paymentStatus == 'UNPAID'
+          ? 0.0
+          : (_paymentStatus == 'PAID' ? totalAmount : _amountPaid);
+
+      if (_paymentStatus == 'PAID' || (_paymentStatus == 'PARTIAL' && amountPaid > 0)) {
+        List<AccountModel> accounts = [];
+        try {
+          accounts = await AccountService.getAccounts();
+        } catch (_) {}
+
+        final assetAccounts = accounts
+            .where((a) => a.accountType.toUpperCase() == 'ASSET')
+            .toList();
+        final totalFunds = assetAccounts.fold<double>(
+          0.0,
+          (sum, acc) => sum + acc.balance,
+        );
+
+        if (assetAccounts.isEmpty || totalFunds < amountPaid) {
+          setState(() => _isLoading = false);
+          if (mounted) {
+            final shouldChangeToUnpaid = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 52),
+                title: const Text('No Money in Accounts Section', style: TextStyle(fontWeight: FontWeight.bold)),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'There is not enough money in the accounts section to pay for this purchase bill.',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Theme.of(context).dividerColor),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Amount to Pay:'),
+                              Text('₹${amountPaid.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Available in Accounts:'),
+                              Text('₹${totalFunds.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                            ],
+                          ),
+                          const Divider(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Shortage:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text('₹${(amountPaid - totalFunds).clamp(0.0, double.infinity).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text(
+                      'Would you like to save this bill as UNPAID (Credit) instead, or cancel and add money in Accounts?',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF166534),
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Save as UNPAID (Credit)'),
+                  ),
+                ],
+              ),
+            );
+
+            if (shouldChangeToUnpaid == true) {
+              setState(() {
+                _paymentStatus = 'UNPAID';
+                _amountPaid = 0.0;
+              });
+              _submit();
+            }
+          }
+          return;
+        }
+      }
 
       final billData = {
         'shop_id': shopId,
@@ -182,8 +291,22 @@ class _AddPurchaseBillScreenState extends ConsumerState<AddPurchaseBillScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            icon: const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            title: const Text('Purchase Creation Failed'),
+            content: Text(
+              e.toString().replaceFirst('Exception: ', ''),
+              style: const TextStyle(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
         );
       }
     } finally {

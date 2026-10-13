@@ -57,7 +57,7 @@ class AccountService {
   static Future<AccountSummaryModel> getSummary({String? shopId}) async {
     try {
       final actualShopId = shopId ?? await InventoryService.getShopId();
-      final queryParams = {'tenant_id': actualShopId};
+      final queryParams = {'shop_id': actualShopId, 'tenant_id': actualShopId};
       final response = await ApiClient().dio.get('/api/accounts/summary', queryParameters: queryParams);
 
       if (response.statusCode == 200) {
@@ -77,10 +77,13 @@ class AccountService {
     }
   }
 
-  static Future<List<AccountModel>> getAccounts() async {
+  static Future<List<AccountModel>> getAccounts({String? shopId}) async {
     try {
-      final shopId = await InventoryService.getShopId();
-      final response = await ApiClient().dio.get('/api/accounts', queryParameters: {'tenant_id': shopId});
+      final actualShopId = shopId ?? await InventoryService.getShopId();
+      final response = await ApiClient().dio.get(
+        '/api/accounts',
+        queryParameters: {'shop_id': actualShopId, 'tenant_id': actualShopId},
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;

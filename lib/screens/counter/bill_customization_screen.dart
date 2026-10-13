@@ -46,6 +46,7 @@ class _BillCustomizationScreenState
   final TextEditingController _acHolderCtrl = TextEditingController();
   final TextEditingController _acNumberCtrl = TextEditingController();
   final TextEditingController _ifscCtrl = TextEditingController();
+  final TextEditingController _upiIdCtrl = TextEditingController();
 
   final TextEditingController _terms1Ctrl = TextEditingController();
   final TextEditingController _terms2Ctrl = TextEditingController();
@@ -99,6 +100,7 @@ class _BillCustomizationScreenState
     _acHolderCtrl.dispose();
     _acNumberCtrl.dispose();
     _ifscCtrl.dispose();
+    _upiIdCtrl.dispose();
     _terms1Ctrl.dispose();
     _terms2Ctrl.dispose();
     _terms3Ctrl.dispose();
@@ -122,6 +124,7 @@ class _BillCustomizationScreenState
       _acHolderCtrl.text = settings['ac_holder_name'] ?? '';
       _acNumberCtrl.text = settings['ac_number'] ?? '';
       _ifscCtrl.text = settings['ifsc_code'] ?? '';
+      _upiIdCtrl.text = settings['upi_id'] ?? '';
 
       _terms1Ctrl.text = settings['terms_1'] ?? '';
       _terms2Ctrl.text = settings['terms_2'] ?? '';
@@ -187,6 +190,7 @@ class _BillCustomizationScreenState
         'ac_holder_name': _acHolderCtrl.text,
         'ac_number': _acNumberCtrl.text,
         'ifsc_code': _ifscCtrl.text,
+        'upi_id': _upiIdCtrl.text.trim(),
         'terms_1': _terms1Ctrl.text,
         'terms_2': _terms2Ctrl.text,
         'terms_3': _terms3Ctrl.text,
@@ -321,6 +325,7 @@ class _BillCustomizationScreenState
         acHolderName: _acHolderCtrl.text,
         acNumber: _acNumberCtrl.text,
         ifscCode: _ifscCtrl.text,
+        upiId: _upiIdCtrl.text.trim(),
         terms1: _terms1Ctrl.text,
         terms2: _terms2Ctrl.text,
         terms3: _terms3Ctrl.text,
@@ -565,6 +570,7 @@ class _BillCustomizationScreenState
                                       acHolderCtrl: _acHolderCtrl,
                                       acNumberCtrl: _acNumberCtrl,
                                       ifscCtrl: _ifscCtrl,
+                                      upiIdCtrl: _upiIdCtrl,
                                     ),
                                   ],
                                 ),

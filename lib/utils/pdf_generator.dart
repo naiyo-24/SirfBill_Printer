@@ -190,6 +190,7 @@ class PdfGenerator {
     final String acHolder = shopSettings?['ac_holder_name'] ?? shopName;
     final String acNumber = shopSettings?['ac_number'] ?? '123456789012';
     final String ifsc = shopSettings?['ifsc_code'] ?? 'SBIN0000123';
+    final String upiId = shopSettings?['upi_id']?.toString().trim() ?? '';
 
     final String term1 =
         shopSettings?['terms_1'] ??
@@ -223,6 +224,7 @@ class PdfGenerator {
         shopGstNo: shopGstNo,
         cinNumber: cinNumber,
         drugLicence: drugLicence,
+        upiId: upiId,
         logoImage: logoImage,
         qrImage: qrImage,
         billingDate: billingDate,
@@ -257,6 +259,7 @@ class PdfGenerator {
         acHolder: acHolder,
         acNumber: acNumber,
         ifsc: ifsc,
+        upiId: upiId,
         term1: term1,
         term2: term2,
         term3: term3,
@@ -297,6 +300,7 @@ class PdfGenerator {
         acHolder: acHolder,
         acNumber: acNumber,
         ifsc: ifsc,
+        upiId: upiId,
         term1: term1,
         term2: term2,
         term3: term3,

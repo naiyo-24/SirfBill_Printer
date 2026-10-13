@@ -11,6 +11,7 @@ class ShopSettings {
   final String acHolderName;
   final String acNumber;
   final String ifscCode;
+  final String upiId;
   final String terms1;
   final String terms2;
   final String terms3;
@@ -31,6 +32,7 @@ class ShopSettings {
     required this.acHolderName,
     required this.acNumber,
     required this.ifscCode,
+    this.upiId = '',
     required this.terms1,
     required this.terms2,
     required this.terms3,
@@ -53,6 +55,7 @@ class ShopSettings {
       acHolderName: map['ac_holder_name'] ?? '',
       acNumber: map['ac_number'] ?? '',
       ifscCode: map['ifsc_code'] ?? '',
+      upiId: map['upi_id'] ?? '',
       terms1: map['terms_1'] ?? '',
       terms2: map['terms_2'] ?? '',
       terms3: map['terms_3'] ?? '',
@@ -75,6 +78,7 @@ class ShopSettings {
       'ac_holder_name': acHolderName,
       'ac_number': acNumber,
       'ifsc_code': ifscCode,
+      'upi_id': upiId,
       'terms_1': terms1,
       'terms_2': terms2,
       'terms_3': terms3,

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../config/api_client.dart';
@@ -5,6 +6,24 @@ import 'inventory_service.dart';
 
 class PurchaseService {
   final ApiClient _apiClient = ApiClient();
+
+  String _extractErrorMessage(dynamic error) {
+    if (error is DioException) {
+      if (error.response?.data != null) {
+        final data = error.response!.data;
+        if (data is Map) {
+          if (data['detail'] != null) return data['detail'].toString();
+          if (data['message'] != null) return data['message'].toString();
+        } else if (data is String && data.isNotEmpty) {
+          return data;
+        }
+      }
+      if (error.message != null && error.message!.isNotEmpty) {
+        return error.message!;
+      }
+    }
+    return error.toString();
+  }
 
   // Create a purchase bill
   Future<Map<String, dynamic>> createPurchaseBill(Map<String, dynamic> data) async {
@@ -20,10 +39,11 @@ class PurchaseService {
       }
       throw Exception('Failed to create purchase bill: ${response.statusCode} - ${response.data}');
     } catch (e) {
+      final msg = _extractErrorMessage(e);
       if (kDebugMode) {
-        print('Error creating purchase bill: $e');
+        print('Error creating purchase bill: $msg');
       }
-      rethrow;
+      throw Exception(msg);
     }
   }
 
@@ -46,18 +66,38 @@ class PurchaseService {
       return [];
     }
   }
+
   // Mark a purchase bill as PAID
-  Future<void> markBillAsPaid(String billId) async {
+  Future<Map<String, dynamic>> markBillAsPaid(
+    String billId, {
+    String? accountId,
+    String? paymentMethod,
+  }) async {
     try {
-      final response = await _apiClient.dio.patch('/api/admin/purchases/$billId/pay');
-      if (response.statusCode != 200) {
-        throw Exception('Failed to mark bill as paid');
+      final queryParams = <String, dynamic>{};
+      if (accountId != null && accountId.isNotEmpty) {
+        queryParams['account_id'] = accountId;
       }
+      if (paymentMethod != null && paymentMethod.isNotEmpty) {
+        queryParams['payment_method'] = paymentMethod;
+      }
+
+      final response = await _apiClient.dio.patch(
+        '/api/admin/purchases/$billId/pay',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode == 200) {
+        return response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : {'status': 'success'};
+      }
+      throw Exception('Failed to mark bill as paid');
     } catch (e) {
+      final msg = _extractErrorMessage(e);
       if (kDebugMode) {
-        print('Error paying bill: $e');
+        print('Error paying bill: $msg');
       }
-      rethrow;
+      throw Exception(msg);
     }
   }
 }
