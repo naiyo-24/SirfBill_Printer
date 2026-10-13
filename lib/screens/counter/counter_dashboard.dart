@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../utils/responsive.dart';
 import '../../services/auth_service.dart';
 import '../../services/shop_settings_service.dart';
+import '../../services/windows_auto_updater.dart';
 import '../../providers/counter_providers.dart';
 import '../../providers/theme_provider.dart';
 
@@ -41,6 +42,16 @@ class _CounterDashboardState extends ConsumerState<CounterDashboard> {
 
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
     _fetchShopName();
+    _checkWindowsUpdates();
+  }
+
+  Future<void> _checkWindowsUpdates() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final updateInfo = await WindowsAutoUpdater.checkForUpdate();
+      if (updateInfo != null && mounted) {
+        WindowsAutoUpdater.showUpdateDialog(context, updateInfo);
+      }
+    });
   }
 
   Future<void> _fetchShopName() async {

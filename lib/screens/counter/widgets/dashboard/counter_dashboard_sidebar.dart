@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../services/windows_auto_updater.dart';
 import 'sidebar_nav_item.dart';
 
 class CounterDashboardSidebar extends StatelessWidget {
@@ -219,9 +220,36 @@ class CounterDashboardSidebar extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.all(expanded ? 24.0 : 16.0),
                 child: Center(
-                  child: Text(
-                    expanded ? 'Version 1.0.0' : 'v1',
-                    style: TextStyle(fontSize: 10, color: subtitleColor),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () async {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Checking for updates...'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                      final updateInfo = await WindowsAutoUpdater.checkForUpdate();
+                      if (context.mounted) {
+                        if (updateInfo != null) {
+                          WindowsAutoUpdater.showUpdateDialog(context, updateInfo);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('SirfBill is already up to date!'),
+                              backgroundColor: Color(0xFF166534),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Text(
+                        expanded ? 'Version 1.0.0 (Check for updates)' : 'v1',
+                        style: TextStyle(fontSize: 10, color: subtitleColor, decoration: TextDecoration.underline),
+                      ),
+                    ),
                   ),
                 ),
               ),
