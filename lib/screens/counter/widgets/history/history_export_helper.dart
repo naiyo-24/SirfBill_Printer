@@ -264,6 +264,7 @@ class HistoryExportHelper {
                     canDebug: false,
                     canChangeOrientation: false,
                     canChangePageFormat: false,
+                    pdfFileName: '${bill.invoiceNo}.pdf',
                     initialPageFormat: bill.format == 'Thermal'
                         ? const PdfPageFormat(
                             80 * PdfPageFormat.mm,

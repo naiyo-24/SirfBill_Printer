@@ -395,7 +395,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
       );
 
       await FileSaver.instance.saveFile(
-        name: 'Bill_$invoiceNo',
+        name: invoiceNo,
         bytes: pdfBytes,
         fileExtension: 'pdf',
         mimeType: MimeType.pdf,
@@ -436,7 +436,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
       try {
         final paymentMethod = ref.read(billingProvider).paymentMethod;
         await TransactionService.saveTransaction({
-          "date": DateTime.now().toUtc().toIso8601String(),
+          "date": DateTime.now().toIso8601String(),
           "amount": _grandTotal,
           "transaction_type": "INCOME",
           "description": "Sale - Invoice #$invoiceNo (${_customerNameController.text.isNotEmpty ? _customerNameController.text : 'Walk-in'})",
@@ -473,7 +473,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
 
         await Printing.layoutPdf(
           onLayout: (_) async => pdfBytes,
-          name: 'Bill_$invoiceNo.pdf',
+          name: '$invoiceNo.pdf',
           format: pageFormat,
         );
       }

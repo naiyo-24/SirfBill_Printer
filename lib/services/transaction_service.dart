@@ -33,9 +33,15 @@ class TransactionModel {
 
     if (json['date'] != null) {
       try {
-        final dt = DateTime.parse(json['date']);
-        parsedDate = DateFormat('dd MMM yyyy').format(dt);
-        parsedTime = DateFormat('hh:mm a').format(dt);
+        final rawStr = json['date'].toString();
+        // If the date string has no timezone specified, parse it or treat as UTC if needed, then convert to local
+        DateTime dt = DateTime.parse(rawStr);
+        if (!dt.isUtc && rawStr.endsWith('Z')) {
+          dt = dt.toUtc();
+        }
+        final localDt = dt.toLocal();
+        parsedDate = DateFormat('dd MMM yyyy').format(localDt);
+        parsedTime = DateFormat('hh:mm a').format(localDt);
       } catch (e) {
         parsedDate = json['date'];
       }

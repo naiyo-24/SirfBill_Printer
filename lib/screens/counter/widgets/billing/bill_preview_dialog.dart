@@ -112,7 +112,7 @@ class BillPreviewDialog extends StatelessWidget {
                     canDebug: false,
                     canChangeOrientation: false,
                     canChangePageFormat: false,
-                    pdfFileName: 'Bill_$invoiceNo.pdf',
+                    pdfFileName: '$invoiceNo.pdf',
                     initialPageFormat: format == 'Thermal'
                         ? const PdfPageFormat(80 * PdfPageFormat.mm, 300 * PdfPageFormat.mm)
                         : format == 'A5'

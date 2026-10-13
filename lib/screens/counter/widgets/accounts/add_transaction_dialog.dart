@@ -135,7 +135,7 @@ void showAddTransactionDialog(
 
                       final now = DateTime.now();
                       final payload = {
-                        "date": now.toUtc().toIso8601String(),
+                        "date": now.toIso8601String(),
                         "amount": double.tryParse(amountCtrl.text) ?? 0.0,
                         "transaction_type": typeCtrl.text.toUpperCase(),
                         "description": descriptionCtrl.text,
