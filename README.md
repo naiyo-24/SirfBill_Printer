@@ -148,7 +148,7 @@ build/windows/x64/runner/Release/SirfBill.exe
 SirfBill automatically handles environment switching between local debugging and production hosting.
 
 ### Local Development (`.env`)
-The app uses `flutter_dotenv` to read `.env` placed in the project root and assets bundle:
+The app uses `flutter_dotenv` to read `.env` placed in the project root:
 ```env
 API_BASE_URL=http://localhost:8000
 ```
