@@ -5,739 +5,435 @@
     <img alt="SirfBill Logo" src="assets/LOGO.png" width="300">
   </picture>
   <br/>
-  <h1>SirfBill POS - Manju Medical Stores & Digital Clinic</h1>
+  <h1>SirfBill (Printer) - Printing Store POS & Accounting System</h1>
+  <p><strong>Accounting without error</strong> • Multi-Tenant Point of Sale, Granular Stock Inventory, Distributor Billing, and Instant Multi-Format Invoicing</p>
 </div>
-
-Welcome to the **SirfBill POS** application for **Manju Medical Stores & Digital Clinic**! This is a comprehensive, multi-tenant Point of Sale (POS) and inventory management system designed specifically for pharmacies, medical stores, and digital clinics.
 
 ---
 
 ## 📋 Table of Contents
 
-- [Project Overview](#project-overview)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [Environment Configuration](#environment-configuration)
-- [Project Structure](#project-structure)
-- [Architecture Deep Dive](#architecture-deep-dive)
-  - [Layered Architecture](#layered-architecture)
-- [State Management (Riverpod)](#state-management-riverpod)
-- [Models Layer](#models-layer)
-- [Services Layer](#services-layer)
-- [Routing (GoRouter)](#routing-gorouter)
-- [Theming System](#theming-system)
-- [Feature Modules](#feature-modules)
-  - [Multi-Tenant POS & Billing](#multi-tenant-pos--billing)
-  - [Inventory & Stock Management](#inventory--stock-management)
-  - [Financial Accounts & History](#financial-accounts--history)
-- [Backend API Contract](#backend-api-contract)
-- [Key Design Decisions](#key-design-decisions)
-- [Common Gotchas](#common-gotchas)
-- [Adding a New Feature](#adding-a-new-feature)
-- [Contributing](#contributing)
-- [License](#license)
+- [Project Overview](#-project-overview)
+  - [The Problem It Solves](#the-problem-it-solves)
+  - [Core Capabilities](#core-capabilities)
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Getting Started](#-getting-started)
+  - [1. Clone Repository](#1-clone-the-repository)
+  - [2. Environment Configuration](#2-set-up-environment-variables)
+  - [3. Install Dependencies](#3-install-dependencies)
+  - [4. Run on Web](#4-run-on-web)
+  - [5. Build Windows Executable (.exe)](#5-build-windows-desktop-executable-exe)
+- [Environment Configuration](#-environment-configuration)
+- [Project Structure](#-project-structure)
+- [Architecture Deep Dive](#-architecture-deep-dive)
+- [State Management (Riverpod)](#-state-management-riverpod)
+- [Feature Modules](#-feature-modules)
+  - [Multi-Tenant POS & Quick Billing](#-multi-tenant-pos--quick-billing)
+  - [Printing Inventory & Stock Management](#-printing-inventory--stock-management)
+  - [Distributors & Purchase Bills](#-distributors--purchase-bills)
+  - [Dynamic Multi-Format Invoices (A4, A5, Thermal)](#-dynamic-multi-format-invoices-a4-a5-thermal)
+  - [Financial Accounts, Cash Drawer & Ledger](#-financial-accounts-cash-drawer--ledger)
+  - [Bill Customization & Corporate Compliance (CIN)](#-bill-customization--corporate-compliance-cin)
+- [Backend API Contract](#-backend-api-contract)
+- [Key Design Decisions](#-key-design-decisions)
+- [Common Gotchas & Troubleshooting](#-common-gotchas--troubleshooting)
+- [Adding a New Feature](#-adding-a-new-feature)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
 ## 📖 Project Overview
-**SirfBill POS** (Point of Sale) is a robust, cloud-ready accounting and inventory management platform tailored specifically for the medical and pharmacy sector. Designed to replace traditional, error-prone paper billing and isolated legacy software, SirfBill provides a seamless, real-time digital solution for modern storefronts and digital clinics.
 
-At its core, SirfBill is built with a **Multi-Tenant SaaS Architecture**. This means a single deployment of the application can securely host multiple independent shops, pharmacies, or clinics. Each tenant experiences complete data isolation—meaning their inventory, customers, financial accounts, and transaction histories are strictly segregated and protected.
+**SirfBill (Printer)** is a high-performance, cloud-connected Point of Sale (POS), inventory management, and financial accounting platform built specifically for **printing stores, digital printing presses, copy & xerox centres, and graphic supply retailers**.
+
+Built on a **Multi-Tenant SaaS Architecture**, a single deployment securely isolates and manages multiple store branches or tenants. Each store gets its own secure domain with isolated stock catalogs, distributor networks, customer ledgers, cash drawer sessions, and customizable invoice templates.
 
 ### The Problem It Solves
-Medical stores face unique challenges compared to standard retail:
-- **Strict Compliance**: Tracking Drug Licenses, HSN codes, and GSTINs on every invoice.
-- **Granular Inventory**: Managing medicines not just by name, but by specific **Batch Numbers**, **Expiry Dates**, and **Loose vs. Bulk** quantities (e.g., selling 2 tablets out of a strip of 10).
-- **Invoice Formatting**: Accommodating different hardware setups, from standard A4/A5 laser printers to thermal receipt printers, with dynamic terms and conditions.
+Printing businesses manage specialized operational workflows that standard generic retail tools struggle with:
+- **Corporate & Regulatory Identification**: Printing stores and corporate stationery suppliers must display their **CIN Number (Corporate Identification Number)**, **GSTIN**, and **HSN Codes** prominently on tax invoices.
+- **Pack & Loose Unit Mathematics**: Paper stocks (reams vs. sheets, packs vs. units) require precise tracking so items can be sold as whole boxes, individual reams, or loose packs without breaking stock reconciliation.
+- **Diverse Hardware Ecosystems**: Print shops need instant switching between 80mm/58mm **Thermal Receipt Printers** for quick counter slips and **A4 / A5 Laser Printers** for corporate tax invoices and GST delivery challans.
+- **Distributor Purchase Flow**: Rapid ingestion of wholesale supplier invoices, updating unit buying prices, recalculating stock automatically, and tracking credit or payment balances.
 
-SirfBill solves these challenges by providing an intuitive, lightning-fast web interface (built with Flutter) backed by a highly secure and scalable backend (FastAPI + PostgreSQL). It empowers store owners to focus on their customers while the software handles the heavy lifting of inventory alerts, financial summaries, and professional PDF generation.
+### Core Capabilities
+- ⚡ **High-Speed Counter Billing**: Keyboard-shortcut-driven cart additions, live discount recalculations, customer ledger tagging, and split payments (Cash, UPI, Card, Credit).
+- 📦 **Granular Item Inventory**: Barcode/SKU scanning, pack sizes, rack locations, low-stock threshold alerts, and instant Excel/CSV/PDF exports.
+- 🏢 **Distributor Relationship Management**: Maintain supplier profiles, purchase bills, payment statuses (`PAID`, `UNPAID`), and top-selling product analytics.
+- 🖨️ **Client-Side PDF Generation**: Crystal-clear vector invoices formatted for A4, A5, and Thermal receipt formats with zero server rendering lag.
+- 📊 **Real-time Financials**: Daily cash drawers, immutable expense and income transactions, and live profit-loss summaries.
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Frontend Architecture
 | Technology | Role | Why We Chose It |
-|------------|------|-----------------|
-| **Flutter Web** | Core UI Framework | Provides a unified codebase capable of compiling to a high-performance web application with a desktop-class layout. |
-| **Riverpod** | State Management | Ensures compile-safe, robust state management. Crucial for handling real-time POS cart updates and caching authentication states securely. |
-| **GoRouter** | Routing | Manages complex web navigation, URL parameters, and auth-guard redirects (kicking unauthenticated users back to login). |
-| **Dio** | Networking | Advanced HTTP client that handles global interceptors (for Bearer tokens) and centralized error logging across the app. |
-| **pdf & printing** | Invoice Generation | Allows the frontend to dynamically construct and render complex A4, A5, and Thermal PDF invoices purely in Dart, offloading computation from the backend. |
+|---|---|---|
+| **Flutter Web & Desktop** | Core UI Framework | High-performance canvas-rendered UI sharing a single codebase across Web and native Windows desktop (`SirfBill.exe`). |
+| **Riverpod** | State Management | Compile-time safe, decoupled reactive state. Powers the real-time POS cart, search debouncing, and cached distributor lookups. |
+| **GoRouter** | Routing & Deep Linking | Declarative stateful routing with sub-routes, browser URL synchronization, and role-based redirect guards. |
+| **Dio & Pretty Logger** | Networking | Robust HTTP networking with automatic Bearer token interceptors, unified error formatting, and timeout management. |
+| **pdf & printing** | Invoicing Engine | High-resolution client-side PDF document layout (A4, A5, Thermal) rendering directly in Dart without backend bottlenecks. |
+| **fl_chart** | Analytics | Smooth vector charts for distributor sales volumes and store revenue trends. |
 
 ### Backend Architecture
 | Technology | Role | Why We Chose It |
-|------------|------|-----------------|
-| **Python & FastAPI** | Core API Framework | Delivers lightning-fast RESTful APIs with automatic OpenAPI (Swagger) documentation and high async concurrency. |
-| **SQLAlchemy** | ORM | Provides strict database schemas and handles complex relational joins, which is vital for maintaining complete data isolation in a multi-tenant environment. |
-| **PostgreSQL** | Database | A highly reliable, ACID-compliant relational database perfect for handling transactional accounting and granular inventory tracking. |
-| **JWT** | Authentication | Secures API endpoints via stateless JSON Web Tokens, ensuring users can only access their specific shop's data. |
+|---|---|---|
+| **Python & FastAPI** | Core REST API | Asynchronous, auto-documenting OpenAPI endpoints with strict Pydantic schemas. |
+| **SQLAlchemy 2.0** | ORM | Strongly typed database queries with tenant isolation filters on every transaction. |
+| **PostgreSQL** | Database | ACID-compliant relational storage for transactional ledgers and stock quantities. |
+| **Alembic** | Schema Migrations | Safe, repeatable database schema evolutions. |
+| **JWT (Jose)** | Authentication | Stateless authentication passing `tenant_id` and role permissions in secure tokens. |
+
+---
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed on your machine:
+### Frontend Environment
+- **Flutter SDK** (`>=3.19.0` / Dart `>=3.3.0`): [Install Flutter](https://docs.flutter.dev/get-started/install)
+- **Google Chrome**: For web development and debugging
+- **Visual Studio 2022** (Desktop C++ workload): Required only if compiling the native Windows desktop `.exe`
 
-### Frontend
-- **Flutter SDK** (`>=3.19.0` recommended): [Install Flutter](https://docs.flutter.dev/get-started/install)
-- **Dart SDK** (Bundled with Flutter)
-- **Web Browser**: Google Chrome (for local testing of the web build)
-
-### Backend & Database
+### Backend Environment
 - **Python** (`3.10+`): [Install Python](https://www.python.org/downloads/)
-- **PostgreSQL**: [Install PostgreSQL](https://www.postgresql.org/download/) (or use a cloud provider like Supabase/Neon)
+- **PostgreSQL** (`14+`): Local PostgreSQL instance or cloud PostgreSQL
 
-### Recommended Tools
-- **IDE**: [Visual Studio Code](https://code.visualstudio.com/) or [Android Studio](https://developer.android.com/studio)
-- **Extensions**: Flutter & Dart plugins for your IDE
-- **API Tester**: [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/) (for testing FastAPI endpoints)
+---
 
 ## 🚀 Getting Started
 
-Follow these instructions to get a local copy up and running for development and testing.
-
 ### 1. Clone the repository
-First, clone the frontend repository to your local machine:
 ```bash
-git clone https://github.com/your-username/sirfbill-pos.git
-cd sirfbill-pos
+git clone https://github.com/your-username/sirfbill-printer.git
+cd sirfbill-printer
 ```
 
 ### 2. Set up Environment Variables
-Create a `.env` file in the root of the Flutter project to point to your backend API.
+Create a `.env` file in the project root:
 ```bash
 touch .env
 ```
-Add the following line to the `.env` file (replace with your local or live backend URL):
+Populate your backend API endpoint:
 ```env
 API_BASE_URL=http://127.0.0.1:8000
 ```
 
 ### 3. Install Dependencies
-Run the following command to download all required Flutter and Dart packages:
 ```bash
 flutter pub get
 ```
 
-### 4. Run the Application
-Since this application is heavily optimized for web and desktop layouts, it is best tested on Chrome:
+### 4. Run on Web
+Launch the app in Chrome:
 ```bash
 flutter run -d chrome
 ```
 
-## ⚙️ Environment Configuration
-
-The application intelligently switches between environment variables based on whether it is running in local development or deployed to production. 
-
-### Local Development (The `.env` Fallback)
-For local development, the app reads from a `.env` file using the `flutter_dotenv` package.
-1. Create a `.env` file in the root directory.
-2. Add your development URL: `API_BASE_URL=http://127.0.0.1:8000`.
-3. Add the `.env` file to your `pubspec.yaml` assets so Flutter can read it.
-
-### Production Deployment (The `--dart-define` Approach)
-**⚠️ CRITICAL WARNING FOR FLUTTER WEB:** Web browsers aggressively cache `.env` files. If you deploy an update using a `.env` file, your users will still hit the old backend URL because their browser has cached the old text file.
-
-To bypass this caching issue entirely, we inject the API URL directly into the compiled JavaScript at build time using the `--dart-define` flag:
-
+### 5. Build Windows Desktop Executable (.exe)
+SirfBill includes a fully configured Windows runner with native branding, multi-resolution transparent icons, and executable metadata:
 ```bash
-# Build the web app for production
-flutter build web --dart-define=API_BASE_URL=https://api.example.com
+flutter build windows --release
+```
+The compiled release executable will be available at:
+```text
+build/windows/x64/runner/Release/SirfBill.exe
 ```
 
-### How the Code Handles It
-The `ApiConstants` class is set up to automatically prioritize the compile-time variable, and gracefully fall back to the `.env` file if it doesn't exist:
+---
 
+## ⚙️ Environment Configuration
+
+SirfBill automatically handles environment switching between local debugging and production hosting.
+
+### Local Development (`.env`)
+The app uses `flutter_dotenv` to read `.env` placed in the project root and assets bundle:
+```env
+API_BASE_URL=http://localhost:8000
+```
+
+### Production Deployment (`--dart-define`)
+Web browsers aggressively cache static text assets like `.env`. For production builds, inject the API URL directly into the compiled output using `--dart-define`:
+```bash
+flutter build web --release --dart-define=API_BASE_URL=https://api.yourdomain.com
+```
+
+### Resolution Logic (`ApiConstants`)
+The [api_constants.dart](file:///Users/sayarpaul/Project/SirfBill(Printer)/lib/config/api_constants.dart) file prioritizes compile-time environment definitions and falls back to `.env`:
 ```dart
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 class ApiConstants {
   static String get baseUrl {
-    // 1. Try to get it from compile-time variables (Best for Production Web)
     const dartDefineUrl = String.fromEnvironment('API_BASE_URL');
     if (dartDefineUrl.isNotEmpty) {
       return dartDefineUrl;
     }
-    
-    // 2. Fallback to .env file (Best for Local Development)
-    return dotenv.env['API_BASE_URL'] ?? 'http://127.0.0.1:8000';
+    return dotenv.env['API_BASE_URL'] ?? 'http://localhost:8000';
   }
 }
 ```
+
+---
 
 ## 📂 Project Structure
 
-The codebase is meticulously organized into domain-specific folders to keep the presentation (UI) cleanly separated from the business logic and API layer. Here is the comprehensive file tree:
-
 ```text
 lib/
-├── config/                  # Core App Configurations
-│   ├── api_client.dart      # Singleton Dio instance, auth headers, and logging
-│   └── api_constants.dart   # Centralized environment variables and base URLs
+├── config/                      # Global configurations
+│   ├── api_client.dart          # Singleton Dio client, auth interceptors & logging
+│   └── api_constants.dart       # Centralized API base URL & endpoints
 │
-├── models/                  # Data Transfer Objects (DTOs)
-│   ├── counter_models.dart  # Core POS data schemas
-│   ├── crm_models.dart      # Customer and User schemas
-│   ├── lab_models.dart      # Lab, bookings, and pathology models
-│   └── settings_models.dart # ShopSettings (Drug License, GSTIN, Bank details)
+├── models/                      # Immutable Data Transfer Objects (DTOs)
+│   ├── counter_models.dart      # Cart items, Bill, Customer models
+│   ├── crm_models.dart          # User & Profile schemas
+│   ├── lab_models.dart          # Legacy service models
+│   └── settings_models.dart     # ShopSettings (CIN Number, GSTIN, Bank, Address)
 │
-├── notifiers/               # Riverpod State Notifiers (Business Logic)
-│   ├── accounts_notifier.dart
-│   ├── billing_notifier.dart
-│   ├── category_notifier.dart
-│   ├── counter_notifier.dart
-│   ├── crm_notifier.dart
-│   ├── customer_notifier.dart
-│   ├── doctor_notifier.dart
-│   ├── history_notifier.dart
-│   ├── inventory_notifier.dart
-│   ├── lab_notifier.dart
-│   ├── rack_notifier.dart
-│   └── settings_notifier.dart
+├── notifiers/                   # Riverpod State Notifiers (Business Logic)
+│   ├── accounts_notifier.dart   # Financial ledger & balance state
+│   ├── billing_notifier.dart    # Live cart calculations, discounts, taxes
+│   ├── category_notifier.dart   # Product category list & mutations
+│   ├── customer_notifier.dart   # Customer accounts & balances
+│   ├── history_notifier.dart    # Completed invoice search & pagination
+│   ├── inventory_notifier.dart  # Stock list, filtering, low-stock alerts
+│   ├── rack_notifier.dart       # Storage racks & bin locations
+│   └── settings_notifier.dart   # Shop branding & print customization state
 │
-├── providers/               # Global Riverpod Providers (Dependency Injection)
-│   ├── billing_provider.dart
-│   ├── counter_providers.dart
-│   ├── crm_provider.dart
-│   ├── crm_providers.dart
-│   ├── distributor_provider.dart
-│   ├── lab_providers.dart
-│   └── theme_provider.dart
+├── providers/                   # Dependency Injection & Global Providers
+│   ├── billing_provider.dart    # Active billing cart provider
+│   ├── counter_providers.dart   # Unified POS providers bundle
+│   ├── distributor_provider.dart# Distributors, purchase bills & analytics
+│   └── theme_provider.dart      # Theme mode provider
 │
-├── router/                  # Navigation & Routing
-│   └── app_router.dart      # GoRouter implementation and auth guards
+├── router/                      # Declarative App Navigation
+│   └── app_router.dart          # GoRouter configuration & shell navigation
 │
-├── screens/                 # Presentation Layer (UI Pages)
-│   ├── auth/                
-│   │   ├── login_screen.dart
-│   │   └── role_login_screen.dart
-│   ├── counter/             # POS & Pharmacy Modules
-│   │   ├── accounts_screen.dart
-│   │   ├── add_purchase_bill_screen.dart
-│   │   ├── bill_customization_screen.dart
-│   │   ├── billing_history_screen.dart
-│   │   ├── billing_screen.dart
-│   │   ├── counter_dashboard.dart
-│   │   ├── customers_screen.dart
-│   │   ├── distributor_detail_screen.dart
-│   │   ├── distributors_screen.dart
-│   │   ├── history_screen.dart
-│   │   ├── inventory_screen.dart
-│   │   ├── shop_management_screen.dart
-│   │   └── upload_management_screen.dart
-│   │   └── widgets/         # Component-level subfolders for counter modules
-│   │       ├── accounts/
-│   │       ├── billing/
-│   │       ├── customers/
-│   │       ├── distributors/
-│   │       ├── inventory/
-│   │       └── shop/
-│   ├── crm/                 # Digital Clinic & CRM Modules
-│   │   ├── crm_appointments_screen.dart
-│   │   ├── crm_dashboard.dart
-│   │   ├── crm_dashboard_home.dart
-│   │   ├── crm_doctors_screen.dart
-│   │   ├── crm_orders_screen.dart
-│   │   ├── crm_patients_screen.dart
-│   │   ├── crm_payment_receipt_screen.dart
-│   │   ├── crm_placeholder_screens.dart
-│   │   ├── crm_prescriptions_screen.dart
-│   │   └── crm_send_to_lab_screen.dart
-│   ├── home/                
-│   │   └── dashboard_screen.dart
-│   ├── lab/                 # Pathology & Lab Modules
-│   │   ├── lab_accounts_screen.dart
-│   │   ├── lab_bookings_screen.dart
-│   │   ├── lab_create_template_screen.dart
-│   │   ├── lab_dashboard.dart
-│   │   ├── lab_dashboard_home.dart
-│   │   ├── lab_history_screen.dart
-│   │   ├── lab_packages_screen.dart
-│   │   ├── lab_reports_screen.dart
-│   │   ├── lab_sample_tracking_screen.dart
-│   │   ├── lab_send_reports_screen.dart
-│   │   ├── lab_settings_screen.dart
-│   │   ├── lab_templates_screen.dart
-│   │   ├── lab_tests_screen.dart
-│   │   └── widgets/
-│   │       └── new_booking_modal.dart
-│   └── splash/              
-│       └── splash_screen.dart
+├── screens/                     # UI Views
+│   ├── auth/
+│   │   └── role_login_screen.dart # Role-based authentication (Admin, Counter)
+│   ├── counter/                 # Core POS Modules
+│   │   ├── accounts_screen.dart           # Cash in Hand & Income/Expense ledger
+│   │   ├── add_purchase_bill_screen.dart  # Inward distributor purchase invoices
+│   │   ├── bill_customization_screen.dart # Invoice layout, CIN, bank, terms setup
+│   │   ├── billing_screen.dart            # Main high-speed billing counter
+│   │   ├── counter_dashboard.dart         # Navigation shell & top bar
+│   │   ├── customers_screen.dart          # Customer records & credit history
+│   │   ├── distributor_detail_screen.dart # Supplier history, bills & item metrics
+│   │   ├── distributors_screen.dart       # Distributor directory & KPI cards
+│   │   ├── history_screen.dart            # Invoice archive, reprints & refunds
+│   │   ├── inventory_screen.dart          # Stock table, search & export actions
+│   │   ├── shop_management_screen.dart    # Store branches & settings
+│   │   ├── upload_management_screen.dart  # Add new inventory item with photo
+│   │   └── widgets/                       # Clean modular component libraries
+│   │       ├── accounts/                  # Account metrics, transaction tables
+│   │       ├── bill_customization/        # CIN number input, shop detail cards
+│   │       ├── billing/                   # Cart table, left item picker, checkout
+│   │       ├── customers/                 # Customer metrics & detail panes
+│   │       ├── dashboard/                 # Metric widgets & status indicators
+│   │       ├── distributors/              # Charts, dialogs & distributor lists
+│   │       ├── history/                   # History search, exports & bill details
+│   │       ├── inventory/                 # Inventory table, row widgets & dialogs
+│   │       ├── purchase/                  # Purchase bill items list, search & modals
+│   │       ├── shop/                      # Shop branch cards & forms
+│   │       └── upload/                    # Modular upload cards (basic, pricing, info)
+│   ├── home/
+│   │   └── dashboard_screen.dart          # Overview dashboard & sales charts
+│   └── splash/
+│       └── splash_screen.dart             # Startup loader & token validator
 │
-├── services/                # API and Backend Integrations
-│   ├── account_service.dart
-│   ├── accounting_extended_service.dart
-│   ├── auth_service.dart
-│   ├── billing_history_service.dart
-│   ├── billing_service.dart
-│   ├── category_service.dart
-│   ├── crm_data_service.dart
-│   ├── customer_service.dart
-│   ├── distributor_service.dart
-│   ├── doctor_service.dart
-│   ├── draft_service.dart
-│   ├── export_service.dart
-│   ├── global_search_service.dart
-│   ├── inventory_service.dart
-│   ├── lab_data_service.dart
-│   ├── pdf_generator_service.dart
-│   ├── purchase_service.dart
-│   ├── rack_service.dart
-│   ├── shop_service.dart
-│   ├── shop_settings_service.dart
-│   └── transaction_service.dart
+├── services/                    # API Communication Layer
+│   ├── account_service.dart     # Financial accounts & ledger calls
+│   ├── auth_service.dart        # Login, refresh token & session storage
+│   ├── billing_service.dart     # Order creation & checkout submission
+│   ├── category_service.dart    # Item categories CRUD
+│   ├── customer_service.dart    # Customer directory & balances
+│   ├── distributor_service.dart # Supplier CRUD & analytics
+│   ├── export_service.dart      # Excel, CSV & PDF export helpers
+│   ├── inventory_service.dart   # Stock query, image upload & item CRUD
+│   ├── purchase_service.dart    # Inward purchase bills & payments
+│   ├── rack_service.dart        # Rack & shelf management
+│   ├── shop_service.dart        # Multi-shop branch operations
+│   └── shop_settings_service.dart # Shop profile, CIN & invoice settings
 │
-├── themes/                  # Design System
-│   ├── app_colors.dart      # Centralized hex color constants
-│   └── app_theme.dart       # Material 3 typography and component styles
+├── themes/
+│   └── app_colors.dart          # Curated color tokens & palette
 │
-├── utils/                   # Helpers and Utilities
-│   ├── format_utils.dart    # Currency and date formatters
-│   ├── pdf_generator.dart   # Main interface for invoice creation
-│   ├── pdf_a4_generator.dart# Full-page A4 format implementation
-│   ├── pdf_a5_generator.dart# Half-page A5 format implementation
-│   ├── pdf_thermal_generator.dart # 3-inch thermal printer implementation
-│   └── responsive.dart      # Breakpoints for desktop/tablet scaling
+├── utils/                       # Utilities & Document Engines
+│   ├── format_utils.dart        # Currency & date formatters
+│   ├── pdf_a4_generator.dart    # Standard A4 Tax Invoice PDF generator
+│   ├── pdf_a5_generator.dart    # Compact A5 Tax Invoice PDF generator
+│   ├── pdf_generator.dart       # Unified document dispatch engine
+│   ├── pdf_thermal_generator.dart# 80mm/58mm Thermal receipt layout
+│   └── responsive.dart          # Breakpoint utilities (Mobile / Desktop)
 │
-├── widgets/                 # Global Reusable UI Components
-│   ├── category_dropdown.dart
-│   ├── custom_date_range_picker.dart
-│   ├── custom_pagination.dart
-│   ├── distributor_dropdown.dart
-│   └── rack_dropdown.dart
-│
-└── main.dart                # Application entry point, initializing dotenv and ProviderScope
+└── widgets/                     # Reusable Atomic UI Elements
+    ├── category_dropdown.dart
+    ├── custom_date_range_picker.dart
+    ├── custom_pagination.dart
+    ├── distributor_dropdown.dart
+    ├── horizontal_scroll_wrapper.dart
+    └── rack_dropdown.dart
 ```
 
-## 🏗️ Architecture Deep Dive
+---
 
-The application is built on a strict **Clean Layered Architecture**. This ensures that the user interface is completely decoupled from the API fetching logic and business rules, making the app highly scalable and testable.
+## 🏛️ Architecture Deep Dive
 
-### Data Flow Diagram
+SirfBill adheres to a **Strict Layered Architecture**:
 
 ```mermaid
-flowchart TD
-    subgraph Frontend ["📱 Flutter Frontend (Client-Side)"]
-        direction TB
-        UI["🖥️ UI Layer<br/>(POS Screen)"]
-        State["🔄 State Layer<br/>(Riverpod Notifier)"]
-        Service["🌐 Service Layer<br/>(Dio ApiClient)"]
-        Models["📦 Models Layer<br/>(Dart DTOs)"]
-    end
-
-    subgraph Backend ["☁️ FastAPI Backend (Server-Side)"]
-        direction TB
-        Router["📡 FastAPI Router<br/>(Endpoints)"]
-        Auth["🔑 Middleware<br/>(JWT & Tenant_ID Check)"]
-        DB[("🐘 PostgreSQL DB<br/>(SQLAlchemy)")]
-    end
-
-    %% The Flow
-    UI -- "1. User Scans Barcode" --> State
-    State -- "2. fetchItem()" --> Service
-    Service -- "3. GET /inventory?shop_id=1" --> Router
-    Router -- "4. Validates Token" --> Auth
-    Auth -- "5. Authorized" --> DB
-    DB -- "6. Executes Query" --> DB
-    DB -- "7. Raw JSON" --> Router
-    Router -- "8. 200 OK Response" --> Service
-    Service -- "9. .fromJson()" --> Models
-    Models -- "10. Type-safe InventoryItem" --> State
-    State -- "11. Updates Cart State" --> UI
+graph TD
+    A[Presentation Layer: Screens & Widgets] -->|watches / reads| B[State Layer: Riverpod Notifiers & Providers]
+    B -->|calls| C[Service Layer: API Services]
+    C -->|uses| D[Network Layer: ApiClient Singleton & Dio]
+    D -->|HTTP REST| E[Backend: FastAPI & PostgreSQL]
+    C -->|parses JSON into| F[Models Layer: Dart DTOs]
+    B -->|provides state to| A
 ```
 
-### Layered Architecture Explained
-- **Presentation Layer (`/screens`, `/widgets`)**: Contains all UI elements. It handles user inputs (like scanning a barcode) and passes the action to the Riverpod Notifiers. It has *zero* knowledge of APIs or HTTP requests.
-- **State Layer (`/notifiers`, `/providers`)**: Built entirely on Riverpod. It holds the active state (e.g., current items in the billing cart). When it needs new data, it calls the Service layer, waits for the response, updates itself, and triggers a UI rebuild automatically.
-- **Service Layer (`/services`)**: The only layer allowed to communicate with the outside world. All classes here use the centralized `ApiClient` (Dio) to perform HTTP GET/POST requests and handle 401/500 status codes globally.
-- **Data Layer (`/models`)**: Acts as the strict contract between the frontend and the FastAPI backend. Every JSON response from the Service layer is mapped tightly to a strongly-typed Dart class to prevent runtime crashes caused by typos or missing keys.
+1. **Presentation Layer (`lib/screens`, `lib/widgets`)**:
+   - Built exclusively with `ConsumerWidget` or `ConsumerStatefulWidget`.
+   - UI widgets contain **zero HTTP calls** or data manipulation logic.
+   - Watches Riverpod providers for automatic re-renders when data updates.
+2. **State Layer (`lib/notifiers`, `lib/providers`)**:
+   - Manages state life cycles, debounces search keystrokes, and caches API payloads.
+   - Handles optimistic updates and local filtering.
+3. **Service Layer (`lib/services`)**:
+   - Stateless async classes wrapping API endpoints.
+   - Returns typed Dart Model instances or throws informative domain exceptions.
+4. **Model Layer (`lib/models`)**:
+   - Pure Dart classes with `fromJson` and `toMap` methods. Handles safe type parsing and fallback values.
 
-## 🔄 State Management (Riverpod)
-We use **Riverpod** for robust, compile-safe state management across the entire application. It eliminates the need for `StatefulWidget` in most cases and guarantees UI consistency.
-
-### Provider ↔ Notifier Pattern
-To keep business logic strictly separated from the UI, we implement the `NotifierProvider` pattern:
-1. **State Class**: A class defining the data (e.g., `BillingState`).
-2. **Notifier**: A class containing the actual business logic functions (`addItemToCart()`). It mutates the state.
-3. **Provider**: The global entry point that the UI listens to using `ref.watch()`.
-
-### Code Example:
-```dart
-// 1. The State
-class CartState {
-  final List<CartItem> items;
-  final bool isLoading;
-  CartState({required this.items, this.isLoading = false});
-}
-
-// 2. The Notifier (Business Logic)
-class CartNotifier extends StateNotifier<CartState> {
-  CartNotifier() : super(CartState(items: []));
-
-  void addItem(CartItem item) {
-    state = CartState(items: [...state.items, item]); // Triggers UI Rebuild
-  }
-}
-
-// 3. The Global Provider
-final cartProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
-  return CartNotifier();
-});
-```
-
-**Key areas Riverpod manages:**
-- Caching the JWT Authentication Token securely.
-- Maintaining the globally selected `tenant_id` so the user doesn't have to select their shop on every screen.
-- Real-time updates for cart items during POS checkout without freezing the main thread.
-
-## 📦 Models Layer
-Models act as the single source of truth for JSON serialization and deserialization. By keeping this logic strictly in the `/models` directory, the rest of the application (like UI and Services) never has to touch raw JSON Maps.
-
-- **FastAPI Sync**: They strictly map to the backend Pydantic schemas to prevent typing errors. If a field is `Optional` in Python, it must be `?` (nullable) in Dart.
-- **Strict Factories**: We use Dart factory constructors to safely parse data coming from the API, preventing null-reference crashes.
-
-### Code Example:
-```dart
-class TransactionModel {
-  final int id;
-  final double amount;
-  final String? description; // Maps to Optional[str] in FastAPI
-
-  TransactionModel({
-    required this.id,
-    required this.amount,
-    this.description,
-  });
-
-  // Safely parse from backend JSON
-  factory TransactionModel.fromJson(Map<String, dynamic> json) {
-    return TransactionModel(
-      id: json['id'] ?? 0,
-      amount: (json['amount'] ?? 0.0).toDouble(),
-      description: json['description'], // Can be null
-    );
-  }
-
-  // Convert to JSON for POST requests
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'amount': amount,
-      'description': description,
-    };
-  }
-}
-```
-
-## 🔌 Services Layer
-
-### API Service (`Dio`)
-The backbone of our network layer is the custom `ApiClient` singleton. It configures `Dio` with:
-- **Base URLs**: Fetched dynamically via `ApiConstants`.
-- **Global Timeouts**: Prevents the UI from hanging if the backend server is asleep.
-- **Auth Interceptors**: Automatically injects the `Authorization: Bearer <token>` header into every outbound request.
-- **Global Error Handling**: Catches 401 Unauthorized errors globally and kicks the user back to the login screen if their token expires.
-
-Specific domain services (e.g., `TransactionService`, `InventoryService`) simply call `apiClient.dio.get(...)` and map the raw JSON lists into strict Dart `Models`.
-
-### Code Example:
-```dart
-import 'package:dio/dio.dart';
-import '../config/api_client.dart';
-import '../models/inventory_models.dart';
-
-class InventoryService {
-  final ApiClient _apiClient = ApiClient(); // Singleton instance
-
-  Future<List<InventoryItem>> fetchInventory(String shopId) async {
-    try {
-      // 1. Make the network call (Auth headers are injected automatically by ApiClient)
-      final response = await _apiClient.dio.get('/inventory', queryParameters: {
-        'shop_id': shopId,
-      });
-      
-      // 2. Parse the JSON list into strictly typed Dart Models
-      if (response.data is List) {
-        return (response.data as List)
-            .map((item) => InventoryItem.fromJson(item))
-            .toList();
-      }
-      return [];
-    } on DioException catch (e) {
-      // 3. Centralized error handling
-      throw Exception('Failed to load inventory: ${e.message}');
-    }
-  }
-}
-```
-
-## 🛣️ Routing (GoRouter)
-Routing is managed by the official **`GoRouter`** package. Since SirfBill is a web-first platform, handling URLs correctly is critical.
-
-### Why GoRouter?
-- **Web Deep Linking**: Users can bookmark specific pages (e.g., `https://bill.naiyo24.com/dashboard/billing`) and GoRouter instantly resolves the correct screen.
-- **Auth Guards**: GoRouter acts as our bouncer. If a user tries to access a protected route (like `/inventory`) without a valid JWT token, the router intercepts the request and instantly redirects them to the `/login` screen.
-
-### Code Example:
-```dart
-final appRouterProvider = Provider<GoRouter>((ref) {
-  return GoRouter(
-    initialLocation: '/splash',
-    redirect: (context, state) {
-      // 1. Check Auth State via Riverpod
-      final isAuthenticated = ref.read(authProvider).token != null;
-      final isGoingToLogin = state.matchedLocation == '/login';
-
-      // 2. Auth Guards
-      if (!isAuthenticated && !isGoingToLogin) {
-        return '/login'; // Kick to login if not authenticated
-      }
-      if (isAuthenticated && isGoingToLogin) {
-        return '/dashboard'; // Skip login if already authenticated
-      }
-      return null;
-    },
-    routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/dashboard',
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      // Nested Routes...
-    ],
-  );
-});
-```
-
-## 🎨 Theming System
-The app uses a unified, centralized **Material 3** `ThemeData` configuration located in `lib/themes/`. 
-
-To maintain a consistent, medical-appropriate aesthetic across the entire platform, we strictly enforce the following patterns:
-- **`AppColors`**: A dedicated class holding all hex values (Primary Greens, Secondary Blues, Error Reds, and Surface grays). Developers should *never* hardcode hex values directly into UI widgets.
-- **`AppTheme`**: Defines the global `ThemeData`. This automatically styles all `ElevatedButton`, `TextFormField`, and `Card` widgets across the app so they look identical without needing custom styling on every page.
-- **Typography**: We heavily rely on **Google Fonts** (specifically clean sans-serif fonts) implemented directly within the `AppTheme` text themes.
-
-### Code Example:
-```dart
-// lib/themes/app_colors.dart
-class AppColors {
-  static const Color primary = Color(0xFF2E7D32); // Medical Green
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color error = Color(0xFFD32F2F);
-}
-
-// Accessing the theme in UI
-Container(
-  color: Theme.of(context).colorScheme.primary, // Do this!
-  // color: Colors.green, // DON'T DO THIS!
-)
-```
+---
 
 ## 🧩 Feature Modules
 
-### 🛒 Multi-Tenant POS & Billing
-The billing screen is the highest-traffic module in the application. It provides a lightning-fast checkout experience optimized specifically for pharmacy and clinic workflows.
+### 🛒 Multi-Tenant POS & Quick Billing
+- **Instant Product Search**: Filter printing items by name, barcode SKU, or category with 300ms debounce.
+- **Cart Calculations**: Automatically tallies item subtotals, configurable GST rates (0%, 5%, 12%, 18%, 28%), item-level discounts, and bill-level lump-sum discounts.
+- **Payment Split**: Record transactions as `PAID`, `PARTIAL`, or `UNPAID` (Credit) linked to specific customer accounts.
 
-#### Tenant Isolation
-To support the SaaS model, the frontend NEVER assumes the shop context. Instead:
-- The currently active `shop_id` and `tenant_id` are stored globally in Riverpod (`authProvider`).
-- Every single API call (fetching inventory, saving a bill) forcefully injects this `shop_id` into the query parameters.
-- The FastAPI backend validates this ID against the user's JWT token to ensure they cannot read or write data to another tenant's shop.
+### 📦 Printing Inventory & Stock Management
+- **Item Categorization**: Organize stocks by categories (e.g., *Paper & Boards*, *Inks & Toners*, *Binding & Finishing*, *Stickers & Labels*).
+- **Physical Locations**: Map items to storage racks and bins (e.g., `Rack A-01`, `Shelf B-3`).
+- **Pack & Loose Units**: Manage stocks in pack sizes (e.g., 500 sheets/pack) while permitting sales in fractional packs or loose units.
+- **Low Stock Thresholds**: Visual badges warn store operators when item stock drops below configured safety levels.
 
-#### Dynamic Invoice Generation
-We generate rich PDF invoices (A4, A5, and Thermal) entirely on the client-side using the `pdf` and `printing` packages. This offloads expensive PDF generation from the backend server.
+### 🏢 Distributors & Purchase Bills
+- **Wholesale Inward Billing**: Record stock replenishment bills from paper mills and equipment distributors.
+- **Auto Stock Ingestion**: Creating a purchase bill automatically increments stock counts for items and records the purchase buying price.
+- **Payment Reconciliation**: Track invoice totals, paid amounts, outstanding balances, and mark bills as `PAID` with one click.
 
-**Code Example:**
+### 🖨️ Dynamic Multi-Format Invoices (A4, A5, Thermal)
+Invoices are compiled on the client device using vector commands from the `pdf` library:
+- **A4 Tax Invoice**: Full-width corporate layout with itemized HSN codes, tax slabs (CGST/SGST/IGST), bank payment details, and authorized signature blocks.
+- **A5 Invoice**: Clean, compact format ideal for standard walk-in orders.
+- **Thermal Receipt (80mm)**: Compact receipt format for thermal roll printers featuring shop header, CIN Number, GSTIN, itemized list, and QR code / payment terms.
+
 ```dart
-// Fetch shop settings (Bank details, Drug License, Logo)
-final settings = ref.read(settingsProvider);
-
-// Generate an A5 PDF dynamically in Dart
-final pdfBytes = await PdfA5Generator.generateA5Bill(
+// Generating an A4 Print Document
+final pdfBytes = await PdfA4Generator.generateA4Bill(
   bill: currentBill,
   shopSettings: settings,
-  drugLicence: settings.drugLicense,
+  cinNumber: settings.cinNumber,
   bankName: settings.bankName,
   acNumber: settings.acNumber,
   ifsc: settings.ifsc,
 );
 
-// Preview or Print directly from the browser
 await Printing.layoutPdf(
   onLayout: (PdfPageFormat format) async => pdfBytes,
 );
 ```
 
-### 📦 Inventory & Stock Management
-A granular stock tracking system that moves far beyond simple retail inventory, handling the exact complexities required by pharmacies.
+### 💰 Financial Accounts, Cash Drawer & Ledger
+- **Cash in Hand Tracking**: Live monitoring of daily cash intake vs. disbursements.
+- **Transaction Types**: Tag records as `INCOME`, `EXPENSE`, `PURCHASE`, or `REFUND`.
+- **Immutable Ledger**: Transactions cannot be silently modified, ensuring financial reports always reconcile.
 
-- **Medical Specifics**: Detailed tracking of **Batch Numbers**, **Expiry Dates**, HSN Codes, and MRP.
-- **Loose Items Mathematics**: Supports selling 2 tablets out of a 10-tablet strip without breaking the inventory math. The system calculates base prices per unit and aggregates them accurately in the cart.
-- **Duplicate Name Handling**: The backend database deliberately avoids `unique=True` constraints on medicine names. This allows a pharmacy to stock the exact same medicine "Paracetamol 500mg" but with different batch numbers, expiry dates, or distributors.
-- **Real-time Search & Alerts**: The `InventoryScreen` uses a `TextEditingController` combined with a Riverpod provider to instantly filter thousands of items locally on the client-side, while visually flagging items that are running out of stock.
+### 🏢 Bill Customization & Corporate Compliance (CIN)
+- **CIN Number Validation**: Dedicated input field strictly validated for the 21-character alphanumeric Indian Corporate Identification Number format (`^[A-Za-z0-9]{21}$`).
+- **Invoice Personalization**: Upload shop logo, custom tagline, contact numbers, email, GSTIN, and customizable invoice footer notes.
 
-**Code Example:**
-```dart
-// Filtering inventory based on search query dynamically
-final filteredInventoryProvider = Provider<List<InventoryItem>>((ref) {
-  final allItems = ref.watch(inventoryProvider).items;
-  final searchQuery = ref.watch(inventorySearchQueryProvider).toLowerCase();
-
-  if (searchQuery.isEmpty) return allItems;
-
-  return allItems.where((item) {
-    return item.name.toLowerCase().contains(searchQuery) ||
-           item.batchNumber.toLowerCase().contains(searchQuery);
-  }).toList();
-});
-```
-
-### 💰 Financial Accounts & History
-The financial module replaces the physical ledger book with automated, real-time calculations. It acts as the single source of truth for the shop's financial health.
-
-- **Immutable Transaction Ledger**: Every single sale, expense, supplier payment, or customer refund generates an immutable transaction record. These records are strictly linked to the `tenant_id` and categorized (e.g., 'SALE', 'PURCHASE', 'EXPENSE').
-- **Live Aggregation**: The frontend dynamically aggregates these transaction records to instantly calculate `Cash in Hand`, `Total Income`, `Total Expenses`, and `Net Profit` for the active day or month.
-- **Data Integrity**: By relying on an append-only transaction ledger, the system prevents silent data manipulation and guarantees that the "Cash in Drawer" value is always mathematically provable.
-
-**Code Example:**
-```dart
-// Aggregating transaction history locally to build the financial summary
-final accountSummaryProvider = Provider<AccountSummary>((ref) {
-  final transactions = ref.watch(transactionListProvider).data ?? [];
-  
-  double totalIncome = 0;
-  double totalExpense = 0;
-
-  for (var tx in transactions) {
-    if (tx.type == TransactionType.income) {
-      totalIncome += tx.amount;
-    } else if (tx.type == TransactionType.expense) {
-      totalExpense += tx.amount;
-    }
-  }
-
-  return AccountSummary(
-    totalIncome: totalIncome,
-    totalExpense: totalExpense,
-    netProfit: totalIncome - totalExpense,
-  );
-});
-```
-
-### 🏥 Digital Clinic (CRM)
-A dedicated module for managing patient and doctor relationships.
-- **Doctor Management**: Track visiting doctors and their schedules.
-- **Prescription Uploads**: Digitize and store patient prescriptions.
-- **Appointments**: Schedule and track patient visits.
-
-### 🔬 Pathology & Lab Management
-An integrated solution for managing diagnostic tests.
-- **Test Booking**: Book lab tests directly from the POS.
-- **Sample Tracking**: Track the status of diagnostic samples.
-- **Report Generation**: Deliver final pathology reports to the patient digitally.
+---
 
 ## 🔌 Backend API Contract
-The Flutter app interacts with a Python **FastAPI** backend via standard RESTful JSON endpoints. 
 
-### Core Principles
-- **Stateless Authentication**: The backend does not maintain sessions. The frontend must pass the JWT token (acquired during login) in the `Authorization: Bearer <token>` header for every protected request.
-- **Strict Multi-Tenancy**: The backend heavily utilizes SQLAlchemy. Before executing any `SELECT`, `INSERT`, or `UPDATE` query, the backend filters the operation by the `tenant_id` associated with the JWT token. If a user attempts to fetch a `shop_id` that does not belong to their `tenant_id`, the backend immediately rejects the request.
+The Flutter client communicates with the FastAPI backend over REST:
 
-### Common HTTP Status Codes
-The Flutter `ApiClient` is designed to handle these specific backend responses:
-- `200 OK` / `201 Created`: Request succeeded. Data is parsed into Dart Models.
-- `400 Bad Request`: Usually indicates a validation error (e.g., missing a required field like Batch Number).
-- `401 Unauthorized`: The JWT token has expired or is invalid. The `ApiClient` interceptor catches this and instantly kicks the user back to the `/login` screen.
-- `404 Not Found`: The requested resource (e.g., a specific transaction ID) does not exist or belongs to a different tenant.
-- `500 Internal Server Error`: An unhandled exception occurred on the FastAPI server.
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/admin/auth/login` | Authenticate user & retrieve JWT access token |
+| `GET` | `/api/admin/shops` | List available shops for current tenant |
+| `GET` | `/api/admin/shop/inventory` | Fetch paginated inventory list with query filters |
+| `POST` | `/api/admin/shop/inventory/add` | Add a new inventory item |
+| `PATCH`| `/api/admin/shop/inventory/{id}/update` | Update existing inventory item |
+| `DELETE`| `/api/admin/shop/inventory/{id}/delete` | Remove an inventory item |
+| `GET` | `/api/admin/distributors/` | Fetch supplier and distributor directory |
+| `POST` | `/api/admin/distributors/` | Register a new supplier |
+| `GET` | `/api/admin/purchases/` | Fetch inward distributor purchase bills |
+| `POST` | `/api/admin/purchases/` | Create purchase bill & increment stock |
+| `PATCH`| `/api/admin/purchases/{id}/pay` | Settle purchase bill payment |
+| `GET` | `/api/admin/shop/settings` | Retrieve store profile & CIN details |
+| `PUT` | `/api/admin/shop/settings` | Update store profile, CIN & bank details |
+
+---
 
 ## 🧠 Key Design Decisions
 
-Throughout the development of SirfBill, several architectural choices were made to prioritize speed, scalability, and developer experience.
+1. **Client-Side PDF Compilation**: Eliminates backend PDF rendering compute cost, supports instant print previews, and works completely offline.
+2. **Deterministic Token Interception**: Centralized `ApiClient` singleton automatically injects JWT Bearer tokens and gracefully handles session expiry.
+3. **Decoupled Architecture**: Strict separation between Riverpod state notifiers, API services, and DTO models keeps code maintainable and testable.
+4. **Native Desktop Windows Runner**: Configured with custom multi-resolution `.ico` icon and metadata for distribution as a standalone Windows executable.
 
-### 1. Client-Side PDF Generation
-Rather than pushing JSON to the backend, rendering a PDF via Python, and downloading it (which requires heavy server CPU and causes latency), **all invoice PDFs are generated directly in Dart on the user's device**. 
-- **Benefit**: Zero server cost for PDF rendering, instant generation for the user, and full offline preview capabilities using the `printing` package.
+---
 
-### 2. Singleton `ApiClient`
-Instead of passing HTTP clients into every service constructor or relying on complex dependency injection for network calls, `ApiClient` is implemented as a Dart Singleton.
-- **Benefit**: It guarantees that Auth Interceptors (which attach the JWT token) and global error catchers (which kick users out on 401 Unauthorized) are initialized exactly once and applied universally across the app.
+## ⚠️ Common Gotchas & Troubleshooting
 
-### 3. Separation of Models and Logic
-Dart classes inside `/models` are strictly data classes (DTOs) with `fromJson` and `toJson` methods. They contain absolutely zero business logic.
-- **Benefit**: If the backend API changes a field name, the developer only has to update one file in `/models`, rather than hunting down UI bugs across a dozen different screens.
-
-### 4. Banning `StatefulWidget` (Mostly)
-By relying heavily on Riverpod `ConsumerWidget`, we have virtually eliminated `StatefulWidget` from the codebase (except for complex local animations).
-- **Benefit**: No more `setState()` spaghetti code. UI strictly reacts to the State Layer, meaning it is impossible for the UI to show out-of-sync data.
-
-## ⚠️ Common Gotchas (Troubleshooting)
-
-If you run into bugs while developing or deploying SirfBill, check these common pitfalls first:
-
-### 1. Flutter Web Deployment & Caching (`.env` issues)
-Browsers heavily cache Flutter Web `main.dart.js` and static asset files (like `.env`). If you deploy an update but the live site (`bill.naiyo24.com`) is still trying to hit an old API IP address:
-- **Do not** rely solely on `.env` files for production URLs.
-- **Fix**: You must pass the API URL at compile time using Dart Defines. This forces the Flutter engine to bake the URL into the binary, bypassing the browser's static asset cache.
+### 1. Web Caching of Backend URLs
+Browsers aggressively cache Flutter Web build assets. Always build production releases with:
 ```bash
-# Correct way to build for production web
-flutter build web --dart-define=API_BASE_URL=https://your-production-api.com
+flutter build web --release --dart-define=API_BASE_URL=https://api.yourdomain.com
 ```
 
-### 2. "Already Exists" Database Errors
-If you try to add an item or category and get a `400 Bad Request` saying it already exists, remember that **multi-tenancy applies to names too**. 
-- Previously, the backend had a global `unique=True` constraint on names. This was removed so multiple tenants could use the same names. 
-- However, if you get this error *within* the same `tenant_id`, you must differentiate the item by giving it a unique **Batch Number** or **Category Name**.
+### 2. Windows C++ Diagnostics on macOS (.clangd)
+If your editor flags false-positive C++ errors inside `windows/runner/main.cpp` when working on macOS (e.g. `'flutter/dart_project.h' file not found`), [`.clangd`](file:///Users/sayarpaul/Project/SirfBill(Printer)/.clangd) is configured to suppress these platform-mismatched diagnostics. External schema warnings are disabled in [`.vscode/settings.json`](file:///Users/sayarpaul/Project/SirfBill(Printer)/.vscode/settings.json).
 
-### 3. Account Summary Shows "0"
-If the `AccountSummaryModel` is returning `0.0` for `total_income` despite there being transactions:
-- **Fix**: Check if the backend SQL query is accidentally filtering by `shop_id` when it should be aggregating across all shops for a given `tenant_id`, or vice versa. Always double check which ID the Service layer is passing.
+### 3. Missing Distributor Name in Inventory Table
+When adding items via purchase bills or uploads, both `distributor_id` and `distributor_name` are synchronized. In the UI, [inventory_table_widget.dart](file:///Users/sayarpaul/Project/SirfBill(Printer)/lib/screens/counter/widgets/inventory/inventory_table_widget.dart) uses a fallback lookup against `distributorsProvider` to ensure supplier names always display.
+
+---
 
 ## ➕ Adding a New Feature
 
-Because of the strict Clean Architecture, adding a new feature (like an "Employee Attendance" module) requires following a specific sequence. Do not skip steps or mix layers!
+To add a new module to SirfBill, follow the 5-step clean architecture process:
+1. **Model (`lib/models/`)**: Define the data structure with `fromJson` and `toMap`.
+2. **Service (`lib/services/`)**: Implement API methods using `ApiClient().dio`.
+3. **Notifier (`lib/notifiers/`)**: Create a Riverpod `StateNotifier` to manage state mutations.
+4. **Provider (`lib/providers/`)**: Expose the notifier via `StateNotifierProvider`.
+5. **UI & Routing (`lib/screens/` & `lib/router/app_router.dart`)**: Build the screen with `ConsumerWidget` and register the route.
 
-### Step 1: The Model (`/models`)
-Always start with the data contract. Create a new Dart file (e.g., `attendance_model.dart`). Define your fields, ensuring they exactly match the FastAPI Pydantic schema. Write the `fromJson` factory and `toJson` method.
-
-### Step 2: The Service (`/services`)
-Create the network layer (e.g., `AttendanceService`). Instantiate the `ApiClient` singleton. Write your `Future` methods to handle GET, POST, PUT, and DELETE operations. Map the `response.data` directly into the Model you built in Step 1.
-
-### Step 3: The Notifier/Provider (`/notifiers` or `/providers`)
-Create the State layer (e.g., `AttendanceNotifier`). It should take the Service from Step 2 as a dependency. Write functions that call the service and mutate the local state (e.g., `markPresent()`). Finally, expose it globally using a `StateNotifierProvider`.
-
-### Step 4: The UI (`/screens` and `/widgets`)
-Build your UI using `ConsumerWidget` instead of `StatefulWidget`. Use `ref.watch(attendanceProvider)` to read the data, and `ref.read(attendanceProvider.notifier).markPresent()` to trigger actions. Ensure you use colors from `AppTheme`!
-
-### Step 5: The Route (`router.dart`)
-Finally, map your new screen in `GoRouter`. If the screen requires the user to be logged in, make sure it sits behind the Auth Guard redirect logic.
+---
 
 ## 🤝 Contributing
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make to SirfBill are **greatly appreciated**.
 
-### Coding Standards
-Before submitting a pull request, please ensure:
-- Your code follows the **Clean Layered Architecture** detailed above (no business logic in the UI!).
-- You have not added any `StatefulWidget` unless absolutely necessary (use `ConsumerWidget`).
-- You have run `flutter format .` to format your Dart code.
-- You have checked for linter warnings using `flutter analyze`.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/NewFeature`)
+3. Format your code (`flutter format .`)
+4. Verify analysis (`flutter analyze`)
+5. Commit your changes (`git commit -m 'feat: Add NewFeature'`)
+6. Push to your branch and submit a Pull Request
 
-### Contribution Steps
-1. Fork the Project.
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your Changes using descriptive commit messages (`git commit -m 'feat: Add Awesome Feature'`).
-4. Push to the Branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request detailing what you changed and why.
+---
 
 ## 📄 License
 
-This software is developed exclusively for **Manju Medical Stores & Digital Clinic**. 
+This software is proprietary and developed for **SirfBill (Printer)**. Unauthorized copying, distribution, or commercial exploitation is strictly prohibited.
 
-- **Proprietary Software**: The codebase, UI designs, and architectural patterns within this repository are proprietary. Unauthorized copying, distribution, or modification of this software without explicit permission is strictly prohibited.
-- **Third-Party Libraries**: SirfBill utilizes several open-source packages (e.g., Riverpod, Dio, GoRouter, pdf). These packages remain under their respective licenses (MIT, Apache, etc.). Please see the `pubspec.yaml` file for a full list of dependencies.
+Third-party dependencies used in this project remain governed by their respective open-source licenses (MIT, Apache 2.0, BSD). See [pubspec.yaml](file:///Users/sayarpaul/Project/SirfBill(Printer)/pubspec.yaml) for package details.
 
 ---
+
 <div align="center">
-  <p>Built with ❤️ for pharmacies and digital clinics everywhere.</p>
+  <p>Built with ❤️ for printing stores and digital presses everywhere.</p>
 </div>
