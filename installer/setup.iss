@@ -1,6 +1,6 @@
 ; Inno Setup Script for SirfBill Windows Application
 #define MyAppName "SirfBill"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "Naiyo24"
 #define MyAppURL "https://billbackend.naiyo24.com"
 #define MyAppExeName "SirfBill.exe"

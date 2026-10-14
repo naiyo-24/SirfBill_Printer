@@ -16,7 +16,9 @@ class InventoryNotifier extends AsyncNotifier<List<InventoryItem>> {
 
   @override
   Future<List<InventoryItem>> build() async {
-    return _fetchInventory();
+    final list = await _fetchInventory();
+    _hasMore = list.length >= _limit && list.isNotEmpty;
+    return list;
   }
 
   Future<void> loadInventory({
@@ -27,16 +29,14 @@ class InventoryNotifier extends AsyncNotifier<List<InventoryItem>> {
     String? distributorId,
   }) async {
     _currentSkip = 0;
-    _hasMore = true;
     _lastSearchQuery = searchQuery;
     _lastStartDate = startDate;
     _lastEndDate = endDate;
     _lastCategoryId = categoryId;
     _lastDistributorId = distributorId;
 
-    // Removed state = const AsyncValue.loading(); to prevent UI unmounting during search
-    state = await AsyncValue.guard(
-      () => _fetchInventory(
+    state = await AsyncValue.guard(() async {
+      final list = await _fetchInventory(
         searchQuery: searchQuery,
         startDate: startDate,
         endDate: endDate,
@@ -44,8 +44,10 @@ class InventoryNotifier extends AsyncNotifier<List<InventoryItem>> {
         distributorId: distributorId,
         skip: _currentSkip,
         limit: _limit,
-      ),
-    );
+      );
+      _hasMore = list.length >= _limit && list.isNotEmpty;
+      return list;
+    });
   }
 
   Future<void> loadMore() async {

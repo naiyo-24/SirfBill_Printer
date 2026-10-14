@@ -339,14 +339,49 @@ class _BillingLeftPanelState extends ConsumerState<BillingLeftPanel> {
             ),
           ),
 
-          // Items Table
+          // Items Table or Empty State
           _buildConditionalExpanded(
             widget.hasEnoughHeight,
-            LayoutBuilder(
-              builder: (context, tableConstraints) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+            widget.filteredItems.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 64,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'There is nothing in the inventory',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey.shade300
+                                  : const Color(0xFF475569),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Add items in Inventory (F2) or use Custom Item to bill directly.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : LayoutBuilder(
+                    builder: (context, tableConstraints) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     // FIXED LEFT COLUMN (Item Name)
                     Container(
                       width: widget.isDesktopWidth ? 200 : 120,
