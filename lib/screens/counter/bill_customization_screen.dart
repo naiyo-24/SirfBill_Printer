@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show File;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -222,30 +223,79 @@ class _BillCustomizationScreenState
   }
 
   Future<void> _pickImage(bool isLogo) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
-    if (result != null && result.files.single.bytes != null) {
-      try {
-        final bytes = result.files.single.bytes!;
-        final filename = result.files.single.name;
-        String url;
-        if (isLogo) {
-          url = await ShopSettingsService.uploadLogo(bytes, filename);
-          setState(() => _logoUrl = url);
-        } else {
-          url = await ShopSettingsService.uploadQr(bytes, filename);
-          setState(() => _qrUrl = url);
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        withData: true,
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final platformFile = result.files.single;
+        Uint8List? fileBytes = platformFile.bytes;
+
+        // If running on desktop and bytes are null, read from path
+        if (!kIsWeb && fileBytes == null && platformFile.path != null) {
+          final file = File(platformFile.path!);
+          if (await file.exists()) {
+            fileBytes = await file.readAsBytes();
+          }
         }
-      } catch (e) {
+
+        if (fileBytes == null || fileBytes.isEmpty) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not read image file data.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error uploading image: $e'),
-              backgroundColor: Colors.red,
+              content: Text('Uploading ${isLogo ? "Logo" : "QR Code"}...'),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
+
+        final filename = platformFile.name;
+        String url;
+        if (isLogo) {
+          url = await ShopSettingsService.uploadLogo(fileBytes, filename);
+          setState(() {
+            _logoUrl = url;
+            _cachedLogoBytes = fileBytes;
+            _cachedLogoUrl = url;
+          });
+        } else {
+          url = await ShopSettingsService.uploadQr(fileBytes, filename);
+          setState(() {
+            _qrUrl = url;
+            _cachedQrBytes = fileBytes;
+            _cachedQrUrl = url;
+          });
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${isLogo ? "Logo" : "QR Code"} uploaded successfully! Remember to click "Save Settings".'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -277,8 +327,11 @@ class _BillCustomizationScreenState
         if (_cachedLogoUrl == _logoUrl && _cachedLogoBytes != null) {
           finalLogoBytes = _cachedLogoBytes;
         } else {
+          final logoTarget = _logoUrl!.startsWith('http://') || _logoUrl!.startsWith('https://')
+              ? _logoUrl!
+              : '${_logoUrl!.startsWith('/') ? '' : '/'}$_logoUrl';
           final res = await ApiClient().dio.get(
-            _logoUrl!,
+            logoTarget,
             options: Options(responseType: ResponseType.bytes),
           );
           if (res.statusCode == 200) {
@@ -299,8 +352,11 @@ class _BillCustomizationScreenState
         if (_cachedQrUrl == _qrUrl && _cachedQrBytes != null) {
           finalQrBytes = _cachedQrBytes;
         } else {
+          final qrTarget = _qrUrl!.startsWith('http://') || _qrUrl!.startsWith('https://')
+              ? _qrUrl!
+              : '${_qrUrl!.startsWith('/') ? '' : '/'}$_qrUrl';
           final res = await ApiClient().dio.get(
-            _qrUrl!,
+            qrTarget,
             options: Options(responseType: ResponseType.bytes),
           );
           if (res.statusCode == 200) {

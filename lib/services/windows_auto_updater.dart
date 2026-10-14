@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
 import '../config/api_client.dart';
 
 class AppUpdateInfo {
@@ -30,7 +31,7 @@ class AppUpdateInfo {
 }
 
 class WindowsAutoUpdater {
-  static const String githubRepo = 'sayar2121/SirfBill-Printer-';
+  static const String githubRepo = 'naiyo-24/SirfBill_Printer';
 
   static Future<AppUpdateInfo?> checkForUpdate() async {
     // Only execute update checking on Windows (or allow debug test)
@@ -49,9 +50,14 @@ class WindowsAutoUpdater {
         }
       } catch (_) {}
 
-      // 2. Direct GitHub Releases fallback (automatic without backend setup!)
-      final ghResponse = await ApiClient().dio.get(
+      // 2. Direct GitHub Releases fallback (using clean Dio client without backend headers)
+      final ghResponse = await Dio().get(
         'https://api.github.com/repos/$githubRepo/releases/latest',
+        options: Options(
+          headers: {
+            'Accept': 'application/vnd.github.v3+json',
+          },
+        ),
       );
 
       if (ghResponse.statusCode == 200 && ghResponse.data != null) {

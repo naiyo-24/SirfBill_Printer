@@ -31,8 +31,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 ; Flutter Release Output
 Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; Dedicated Updater Executable
-Source: "..\updater\bin\Release\net8.0-windows\win-x64\publish\updater.exe"; DestDir: "{app}"; Flags: ignoreversion
+; Dedicated Updater Executable (check both publish folder and default bin output)
+Source: "..\updater\publish\updater.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\updater\bin\Release\net8.0-windows\win-x64\publish\updater.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

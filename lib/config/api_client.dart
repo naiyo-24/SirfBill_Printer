@@ -29,10 +29,14 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('access_token');
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+          // Only attach backend JWT Authorization token to backend requests, never to external URLs like GitHub
+          final isExternal = options.uri.host.isNotEmpty && !options.uri.host.contains('naiyo24.com') && !options.uri.host.contains('127.0.0.1') && !options.uri.host.contains('localhost');
+          if (!isExternal) {
+            final prefs = await SharedPreferences.getInstance();
+            final token = prefs.getString('access_token');
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
           }
           return handler.next(options);
         },
@@ -50,7 +54,12 @@ class ApiClient {
           // ignore: avoid_print
           print('Message: ${e.message}');
 
-          if (e.response?.statusCode == 401 && !e.requestOptions.path.contains('auth')) {
+          final isExternal = e.requestOptions.uri.host.isNotEmpty &&
+              !e.requestOptions.uri.host.contains('naiyo24.com') &&
+              !e.requestOptions.uri.host.contains('127.0.0.1') &&
+              !e.requestOptions.uri.host.contains('localhost');
+
+          if (!isExternal && e.response?.statusCode == 401 && !e.requestOptions.path.contains('auth')) {
             // ignore: avoid_print
             print(
               'Unauthorized: Token expired or invalid. Logging out and redirecting.',

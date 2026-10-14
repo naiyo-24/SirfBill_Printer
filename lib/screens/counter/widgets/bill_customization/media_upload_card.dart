@@ -107,12 +107,37 @@ class _MediaItem extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: url != null
+              child: (url != null && url!.isNotEmpty)
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        '${ApiConstants.baseUrl}$url',
+                        url!.startsWith('http://') || url!.startsWith('https://')
+                            ? url!
+                            : '${ApiConstants.baseUrl}${url!.startsWith('/') ? '' : '/'}$url',
                         fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(fallbackIcon, size: 36, color: Colors.orange.shade300),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Preview error',
+                                style: TextStyle(fontSize: 10, color: Colors.grey),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     )
                   : Icon(
