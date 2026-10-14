@@ -189,7 +189,7 @@ class PurchaseItemsList extends ConsumerWidget {
                     ],
                   ),
                   loading: () => const SizedBox.shrink(),
-                  error: (_, _) => const SizedBox.shrink(),
+                  error: (err, stack) => const SizedBox.shrink(),
                 ),
                 categories.when(
                   data: (cList) => Row(
@@ -212,7 +212,7 @@ class PurchaseItemsList extends ConsumerWidget {
                     ],
                   ),
                   loading: () => const SizedBox.shrink(),
-                  error: (_, _) => const SizedBox.shrink(),
+                  error: (err, stack) => const SizedBox.shrink(),
                 ),
               ],
             ),

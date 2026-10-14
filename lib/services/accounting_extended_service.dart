@@ -56,7 +56,10 @@ class AccountingExtendedService {
     try {
       final response = await ApiClient().dio.get(
         '/api/accounts/extended/reports/pnl',
-        queryParameters: {'start_date': ?startDate, 'end_date': ?endDate},
+        queryParameters: {
+          if (startDate != null) 'start_date': startDate,
+          if (endDate != null) 'end_date': endDate,
+        },
       );
       if (response.statusCode == 200) {
         return response.data['data'];

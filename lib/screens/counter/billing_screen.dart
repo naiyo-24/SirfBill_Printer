@@ -663,7 +663,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
     final allItems = inventoryState.when(
       data: _mapAndSortInventory,
       loading: () => <Map<String, dynamic>>[],
-      error: (_, _) => <Map<String, dynamic>>[],
+      error: (err, stack) => <Map<String, dynamic>>[],
     );
 
     final categoryAsync = ref.watch(categoryProvider);
