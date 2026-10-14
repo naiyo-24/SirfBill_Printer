@@ -373,8 +373,8 @@ class _CustomerDetailsPaneState extends ConsumerState<CustomerDetailsPane> {
                     vertical: 8,
                   ),
                   color: Theme.of(context).scaffoldBackgroundColor,
-                  child: Row(
-                    children: const [
+                  child: const Row(
+                    children: [
                       Expanded(
                         flex: 2,
                         child: Text(

@@ -36,11 +36,11 @@ class PurchaseItemsList extends ConsumerWidget {
     final categories = ref.watch(categoryProvider);
 
     if (items.isEmpty) {
-      return Card(
+      return const Card(
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Icon(Icons.shopping_cart_outlined, size: 48, color: Colors.grey),
               SizedBox(height: 12),
               Text(

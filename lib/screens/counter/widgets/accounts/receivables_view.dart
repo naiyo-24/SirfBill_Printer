@@ -49,8 +49,8 @@ class _ReceivablesViewState extends State<ReceivablesView> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           color: Colors.transparent,
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Expanded(
                 flex: 3,
                 child: Text(
@@ -79,7 +79,7 @@ class _ReceivablesViewState extends State<ReceivablesView> {
         ),
         _receivables.isEmpty
             ? Padding(
-                padding: EdgeInsets.all(32),
+                padding: const EdgeInsets.all(32),
                 child: Center(
                   child: Text(
                     'No outstanding receivables!',

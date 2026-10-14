@@ -584,13 +584,13 @@ class _ShopManagementScreenState extends State<ShopManagementScreen> {
                                   : Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: Color(0xFFE2E8F0),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
+                                borderSide: const BorderSide(
                                   color: Color(0xFFE2E8F0),
                                 ),
                               ),
@@ -627,7 +627,7 @@ class _ShopManagementScreenState extends State<ShopManagementScreen> {
                                   value: value,
                                   child: Text(
                                     value,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Color(0xFF475569),
                                       fontSize: 14,
                                     ),
@@ -666,7 +666,7 @@ class _ShopManagementScreenState extends State<ShopManagementScreen> {
                                   value: value,
                                   child: Text(
                                     value,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Color(0xFF475569),
                                       fontSize: 14,
                                     ),

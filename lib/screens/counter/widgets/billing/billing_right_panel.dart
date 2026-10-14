@@ -83,15 +83,15 @@ class BillingRightPanel extends ConsumerWidget {
                 ),
                 InkWell(
                   onTap: onClearCart,
-                  child: Row(
+                  child: const Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.delete_outline,
                         color: Colors.red,
                         size: 16,
                       ),
-                      const SizedBox(width: 4),
-                      const Text(
+                      SizedBox(width: 4),
+                      Text(
                         'Clear All',
                         style: TextStyle(
                           color: Colors.red,

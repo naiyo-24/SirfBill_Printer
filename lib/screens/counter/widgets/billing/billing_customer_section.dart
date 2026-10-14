@@ -96,11 +96,11 @@ Widget _buildCompactField(
                   top: Radius.circular(8),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    children: const [
+                    children: [
                       Icon(
                         Icons.person,
                         color: Color(0xFF166534),
@@ -117,7 +117,7 @@ Widget _buildCompactField(
                       ),
                     ],
                   ),
-                  const Icon(
+                  Icon(
                     Icons.keyboard_arrow_up,
                     color: Color(0xFF166534),
                     size: 16,

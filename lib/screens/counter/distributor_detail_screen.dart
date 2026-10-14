@@ -42,10 +42,10 @@ class DistributorDetailScreen extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 32,
-                      backgroundColor: const Color(0xFFE8F5E9),
-                      child: const Icon(Icons.business, color: Color(0xFF166534), size: 32),
+                      backgroundColor: Color(0xFFE8F5E9),
+                      child: Icon(Icons.business, color: Color(0xFF166534), size: 32),
                     ),
                     const SizedBox(width: 24),
                     Expanded(

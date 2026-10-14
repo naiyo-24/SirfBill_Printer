@@ -169,7 +169,7 @@ class DistributorCharts extends ConsumerWidget {
                         BarChartData(
                           alignment: BarChartAlignment.spaceAround,
                           maxY: maxYBar,
-                          barTouchData: BarTouchData(enabled: false),
+                          barTouchData: const BarTouchData(enabled: false),
                           titlesData: FlTitlesData(
                             show: true,
                             bottomTitles: AxisTitles(

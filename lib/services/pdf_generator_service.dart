@@ -101,7 +101,7 @@ class PdfGeneratorService {
                   child: pw.Center(
                     child: pw.Text(
                       'LOGO',
-                      style: pw.TextStyle(color: PdfColors.grey500),
+                      style: const pw.TextStyle(color: PdfColors.grey500),
                     ),
                   ),
                 ),
@@ -120,7 +120,7 @@ class PdfGeneratorService {
                   ),
                   pw.Text(
                     '',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 10,
                       letterSpacing: 2,
                       color: PdfColors.grey700,

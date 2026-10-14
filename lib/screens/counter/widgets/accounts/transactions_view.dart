@@ -257,8 +257,8 @@ class _TransactionsViewState extends State<TransactionsView> {
                           vertical: 12,
                         ),
                         color: Theme.of(context).scaffoldBackgroundColor,
-                        child: Row(
-                          children: const [
+                        child: const Row(
+                          children: [
                             SizedBox(
                               width: 30,
                               child: Text(

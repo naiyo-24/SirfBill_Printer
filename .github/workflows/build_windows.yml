@@ -39,7 +39,14 @@ jobs:
           Set-Content -Path ".env" -Value "API_BASE_URL=https://billbackend.naiyo24.com"
 
       - name: Build Flutter Windows App (Release)
-        run: flutter build windows --release
+        shell: pwsh
+        run: |
+          $tagName = "${{ github.ref_name }}"
+          if (-not $tagName -or $tagName -eq "main" -or $tagName -eq "master") {
+            $tagName = "v1.0.1"
+          }
+          $cleanVersion = $tagName.TrimStart('v')
+          flutter build windows --release --build-name=$cleanVersion --build-number=1
 
       - name: Build Standalone Updater (.NET 8)
         run: |

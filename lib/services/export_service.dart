@@ -145,22 +145,22 @@ class ExportService {
                           if (shopDetails?['location'] != null || shopDetails?['city'] != null)
                             pw.Text(
                               [shopDetails?['location'], shopDetails?['city']].where((e) => e != null && e.toString().isNotEmpty).join(', '),
-                              style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+                              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
                             ),
                           if (shopDetails?['contact'] != null)
                             pw.Text(
                               'Phone: ${shopDetails?['contact']}',
-                              style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+                              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
                             ),
                           if (shopDetails?['email'] != null)
                             pw.Text(
                               'Email: ${shopDetails?['email']}',
-                              style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+                              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
                             ),
                           if (shopDetails?['gstin'] != null)
                             pw.Text(
                               'GSTIN: ${shopDetails?['gstin']}',
-                              style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+                              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
                             ),
                         ],
                       ),

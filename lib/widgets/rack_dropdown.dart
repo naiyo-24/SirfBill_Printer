@@ -163,10 +163,10 @@ class _RackDropdownState extends ConsumerState<RackDropdown> {
                 ),
               );
             }),
-            DropdownMenuEntry<String?>(
+            const DropdownMenuEntry<String?>(
               value: 'add_new',
               label: 'Add New Rack',
-              leadingIcon: const Icon(Icons.add, color: Color(0xFF22C55E)),
+              leadingIcon: Icon(Icons.add, color: Color(0xFF22C55E)),
             ),
           ],
         );

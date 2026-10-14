@@ -51,7 +51,7 @@ class CustomPagination extends StatelessWidget {
         }
         pageButtons.add(
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               '...',
               style: TextStyle(
@@ -78,7 +78,7 @@ class CustomPagination extends StatelessWidget {
         );
         pageButtons.add(
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               '...',
               style: TextStyle(
@@ -107,7 +107,7 @@ class CustomPagination extends StatelessWidget {
         );
         pageButtons.add(
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               '...',
               style: TextStyle(
@@ -128,7 +128,7 @@ class CustomPagination extends StatelessWidget {
         }
         pageButtons.add(
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               '...',
               style: TextStyle(

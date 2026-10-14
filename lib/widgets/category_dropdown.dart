@@ -159,10 +159,10 @@ class _CategoryDropdownState extends ConsumerState<CategoryDropdown> {
                 ),
               );
             }),
-            DropdownMenuEntry<String?>(
+            const DropdownMenuEntry<String?>(
               value: 'add_new',
               label: 'Add New Category',
-              leadingIcon: const Icon(Icons.add, color: Color(0xFF22C55E)),
+              leadingIcon: Icon(Icons.add, color: Color(0xFF22C55E)),
             ),
           ],
         );

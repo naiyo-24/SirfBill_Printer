@@ -358,8 +358,8 @@ class _PayablesViewState extends ConsumerState<PayablesView> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           color: Colors.transparent,
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Expanded(
                 flex: 3,
                 child: Text(

@@ -49,9 +49,9 @@ class DistributorListView extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: const Color(0xFFE8F5E9),
-                        child: const Icon(Icons.business, color: Color(0xFF166534)),
+                      const CircleAvatar(
+                        backgroundColor: Color(0xFFE8F5E9),
+                        child: Icon(Icons.business, color: Color(0xFF166534)),
                       ),
                       const SizedBox(width: 16),
                       Expanded(

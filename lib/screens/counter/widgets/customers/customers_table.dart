@@ -61,8 +61,8 @@ class CustomersTable extends StatelessWidget {
                           ),
                         ),
                       ),
-                      child: Row(
-                        children: const [
+                      child: const Row(
+                        children: [
                           SizedBox(
                             width: 40,
                             child: Text(

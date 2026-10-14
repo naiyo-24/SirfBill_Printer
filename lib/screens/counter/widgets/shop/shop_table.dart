@@ -60,7 +60,7 @@ class _ShopTableState extends State<ShopTable> {
                 children: [
                   SizedBox(
                     width: 32, 
-                    child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
                   Expanded(
                     flex: 2,
@@ -85,7 +85,7 @@ class _ShopTableState extends State<ShopTable> {
                                   color: const Color(0xFF22C55E), 
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text('Primary', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                child: const Text('Primary', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                               ),
                             ]
                           ],
@@ -224,7 +224,7 @@ class _ShopTableState extends State<ShopTable> {
                               color: const Color(0xFF22C55E), 
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: Text('Primary', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: const Text('Primary', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                         ]
                       ],
@@ -362,7 +362,7 @@ class _ShopTableState extends State<ShopTable> {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(color: const Color(0xFF22C55E), borderRadius: BorderRadius.circular(6)),
-                        child: Center(child: Text('$_currentPage', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))),
+                        child: Center(child: Text('$_currentPage', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))),
                       ),
                       const SizedBox(width: 8),
                       InkWell(

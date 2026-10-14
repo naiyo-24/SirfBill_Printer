@@ -29,7 +29,7 @@ class CounterDashboardSidebar extends StatelessWidget {
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF1E293B);
 
-    final navItems = const [
+    const navItems = [
       (Icons.receipt_long, 'Billing', 'F1'),
       (Icons.inventory_2, 'Inventory', 'F2'),
       (Icons.storefront, 'Shops', 'F3'),
