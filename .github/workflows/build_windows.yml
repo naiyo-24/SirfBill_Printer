@@ -33,6 +33,11 @@ jobs:
       - name: Get Flutter Dependencies
         run: flutter pub get
 
+      - name: Create .env File
+        shell: pwsh
+        run: |
+          Set-Content -Path ".env" -Value "API_BASE_URL=https://billbackend.naiyo24.com"
+
       - name: Build Flutter Windows App (Release)
         run: flutter build windows --release
 
