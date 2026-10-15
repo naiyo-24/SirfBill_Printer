@@ -238,7 +238,7 @@ class CounterDashboardSidebar extends StatelessWidget {
                 child: FutureBuilder<PackageInfo>(
                   future: PackageInfo.fromPlatform(),
                   builder: (context, snapshot) {
-                    final currentVersion = snapshot.hasData ? snapshot.data!.version : '1.0.2';
+                    final currentVersion = snapshot.hasData ? snapshot.data!.version : '1.0.3';
                     return InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () async {
