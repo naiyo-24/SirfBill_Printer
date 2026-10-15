@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../themes/app_colors.dart';
+import '../../services/windows_auto_updater.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,12 +14,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Wait for 3 seconds then navigate to Dashboard
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        context.go('/dashboard');
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    // Show splash animation for at least 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    // Check for updates automatically in the background
+    try {
+      final updateInfo = await WindowsAutoUpdater.checkForUpdate();
+      if (updateInfo != null && mounted) {
+        // Show update dialog directly
+        await WindowsAutoUpdater.showUpdateDialog(context, updateInfo);
       }
-    });
+    } catch (e) {
+      debugPrint('Update check during splash failed or skipped: $e');
+    }
+
+    if (mounted) {
+      context.go('/dashboard');
+    }
   }
 
   @override

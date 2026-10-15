@@ -110,12 +110,34 @@ class WindowsAutoUpdater {
     return false;
   }
 
+  static bool _isDialogShowing = false;
+
+  /// Checks for updates and automatically displays the dialog if an update is found.
+  /// Safe to call multiple times (guards against opening duplicate dialogs).
+  static Future<void> checkAndShowUpdateIfAvailable(BuildContext context) async {
+    try {
+      if (_isDialogShowing) return;
+      final updateInfo = await checkForUpdate();
+      if (updateInfo != null && context.mounted && !_isDialogShowing) {
+        await showUpdateDialog(context, updateInfo);
+      }
+    } catch (e) {
+      debugPrint('Auto-update check encountered error: $e');
+    }
+  }
+
   static Future<void> showUpdateDialog(BuildContext context, AppUpdateInfo info) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: !info.isMandatory,
-      builder: (ctx) => _UpdateDialog(info: info),
-    );
+    if (_isDialogShowing) return;
+    _isDialogShowing = true;
+    try {
+      return await showDialog<void>(
+        context: context,
+        barrierDismissible: !info.isMandatory,
+        builder: (ctx) => _UpdateDialog(info: info),
+      );
+    } finally {
+      _isDialogShowing = false;
+    }
   }
 }
 

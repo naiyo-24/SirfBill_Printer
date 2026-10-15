@@ -46,10 +46,9 @@ class _CounterDashboardState extends ConsumerState<CounterDashboard> {
   }
 
   Future<void> _checkWindowsUpdates() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final updateInfo = await WindowsAutoUpdater.checkForUpdate();
-      if (updateInfo != null && mounted) {
-        WindowsAutoUpdater.showUpdateDialog(context, updateInfo);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        WindowsAutoUpdater.checkAndShowUpdateIfAvailable(context);
       }
     });
   }
