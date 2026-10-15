@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../about/about_us_dialog.dart';
 
 class CounterDashboardHeader extends StatelessWidget {
   final bool isDesktop;
@@ -233,11 +234,27 @@ class CounterDashboardHeader extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     onSelected: (value) {
-                      if (value == 'logout') {
+                      if (value == 'about') {
+                        AboutUsDialog.show(context);
+                      } else if (value == 'logout') {
                         onLogout();
                       }
                     },
                     itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'about',
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded, size: 18, color: Color(0xFF166534)),
+                            SizedBox(width: 8),
+                            Text(
+                              'About SirfBill',
+                              style: TextStyle(fontSize: 14, color: Color(0xFF1E293B)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(height: 1),
                       const PopupMenuItem(
                         value: 'logout',
                         child: Row(

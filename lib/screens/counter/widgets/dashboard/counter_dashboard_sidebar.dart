@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../services/windows_auto_updater.dart';
+import '../about/about_us_dialog.dart';
 import 'sidebar_nav_item.dart';
 
 class CounterDashboardSidebar extends StatelessWidget {
@@ -152,7 +154,7 @@ class CounterDashboardSidebar extends StatelessWidget {
                 ),
               ),
 
-              // Bottom Sidebar Card
+              // Bottom Sidebar Card (About Us)
               AnimatedCrossFade(
                 duration: const Duration(milliseconds: 200),
                 crossFadeState: expanded
@@ -161,98 +163,163 @@ class CounterDashboardSidebar extends StatelessWidget {
                 alignment: Alignment.bottomCenter,
                 firstChild: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    width: isDesktop ? 228 : double.infinity,
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.3 : 0.12,
-                          ),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.eco, color: Color(0xFF22C55E)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Better Care',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: textColor,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                'Brighter Tomorrow',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: subtitleColor,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                secondChild: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: Icon(Icons.eco, color: Color(0xFF22C55E), size: 24),
-                  ),
-                ),
-              ),
-
-              Padding(
-                padding: EdgeInsets.all(expanded ? 24.0 : 16.0),
-                child: Center(
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(4),
-                    onTap: () async {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Checking for updates...'),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                      final updateInfo = await WindowsAutoUpdater.checkForUpdate();
-                      if (context.mounted) {
-                        if (updateInfo != null) {
-                          WindowsAutoUpdater.showUpdateDialog(context, updateInfo);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('SirfBill is already up to date!'),
-                              backgroundColor: Color(0xFF166534),
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => AboutUsDialog.show(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      width: isDesktop ? 228 : double.infinity,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: borderColor.withValues(alpha: 0.6)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.3 : 0.08,
                             ),
-                          );
-                        }
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                      child: Text(
-                        expanded ? 'Version 1.0.0 (Check for updates)' : 'v1',
-                        style: TextStyle(fontSize: 10, color: subtitleColor, decoration: TextDecoration.underline),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline_rounded, color: Color(0xFF22C55E)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'About SirfBill',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: textColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'Company & Support Info',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: subtitleColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, size: 16, color: subtitleColor),
+                        ],
                       ),
                     ),
                   ),
                 ),
+                secondChild: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: IconButton(
+                      icon: const Icon(Icons.info_outline_rounded, color: Color(0xFF22C55E), size: 24),
+                      tooltip: 'About SirfBill',
+                      onPressed: () => AboutUsDialog.show(context),
+                    ),
+                  ),
+                ),
               ),
+
+              // Check for Updates Button
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: expanded ? 16.0 : 12.0,
+                  vertical: 8.0,
+                ),
+                child: FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    final currentVersion = snapshot.hasData ? snapshot.data!.version : '1.0.2';
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Checking for updates...'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                        final updateInfo = await WindowsAutoUpdater.checkForUpdate();
+                        if (context.mounted) {
+                          if (updateInfo != null) {
+                            WindowsAutoUpdater.showUpdateDialog(context, updateInfo);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('SirfBill v$currentVersion is already up to date!'),
+                                backgroundColor: const Color(0xFF166534),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: expanded ? 12 : 8,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF166534).withValues(alpha: isDark ? 0.2 : 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFF166534).withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: expanded
+                              ? MainAxisAlignment.start
+                              : MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.system_update_rounded,
+                              size: 18,
+                              color: Color(0xFF166534),
+                            ),
+                            if (expanded) ...[
+                              const SizedBox(width: 10),
+                              const Expanded(
+                                child: Text(
+                                  'Check for Updates',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF166534),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF166534),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'v$currentVersion',
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
             ],
           ),
         ),

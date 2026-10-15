@@ -285,9 +285,9 @@ class _BillingCartTableState extends State<BillingCartTable> {
                                           ],
                                         ),
                                       ),
-                                      ),
                                     ),
                                   ),
+                                ),
                                   Expanded(
                                     flex: 2,
                                     child: Align(
@@ -313,26 +313,56 @@ class _BillingCartTableState extends State<BillingCartTable> {
                                   ),
                                   Expanded(
                                     flex: 2,
-                                    child: Text(
-                                      (item['price'] as num).toDouble().toStringAsFixed(2),
-                                      style: TextStyle(
-                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF1E293B),
-                                        fontSize: 11,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: SizedBox(
+                                        height: 24,
+                                        width: 55,
+                                        child: TextFormField(
+                                          key: ValueKey('price_${item['name']}_$index'),
+                                          initialValue: (item['price'] as num?)?.toDouble().toStringAsFixed(2) ?? '0.00',
+                                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF1E293B),
+                                          ),
+                                          decoration: const InputDecoration(
+                                            contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          onChanged: (val) {
+                                            final newPrice = double.tryParse(val) ?? 0.0;
+                                            widget.notifier.updateItemPrice(index, newPrice);
+                                          },
+                                        ),
                                       ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
-                                    child: Text(
-                                      ((item['cgst'] as num? ?? 0.0) +
-                                                  (item['sgst'] as num? ??
-                                                      0.0)) >
-                                              0
-                                          ? '${((item['cgst'] as num? ?? 0.0) + (item['sgst'] as num? ?? 0.0)).toStringAsFixed(1)}%'
-                                          : '-',
-                                      style: TextStyle(
-                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : const Color(0xFF64748B),
-                                        fontSize: 11,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: SizedBox(
+                                        height: 24,
+                                        width: 48,
+                                        child: TextFormField(
+                                          key: ValueKey('gst_${item['name']}_$index'),
+                                          initialValue: (((item['cgst'] as num? ?? 0.0) + (item['sgst'] as num? ?? 0.0))).toStringAsFixed(1),
+                                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[300] : const Color(0xFF475569),
+                                          ),
+                                          decoration: const InputDecoration(
+                                            contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          onChanged: (val) {
+                                            final newGst = double.tryParse(val) ?? 0.0;
+                                            widget.notifier.updateItemGst(index, newGst);
+                                          },
+                                        ),
                                       ),
                                     ),
                                   ),

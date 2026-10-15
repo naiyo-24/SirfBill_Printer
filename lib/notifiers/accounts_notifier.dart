@@ -103,8 +103,8 @@ class AccountsNotifier extends AsyncNotifier<AccountsState> {
           existingDescriptions.add(description.toLowerCase());
           String dateStr = item['date']?.toString() ?? '';
           dateStr = dateStr.replaceAll(' ', 'T');
-          if (dateStr.endsWith('Z')) {
-            dateStr = dateStr.substring(0, dateStr.length - 1);
+          if (!dateStr.endsWith('Z')) {
+            dateStr += 'Z';
           }
           final dt = (DateTime.tryParse(dateStr) ?? DateTime.now()).toLocal();
           

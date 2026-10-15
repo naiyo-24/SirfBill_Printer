@@ -25,10 +25,10 @@ class HistoryNotifier extends AsyncNotifier<HistoryState> {
     final serverTransactions = historyList.map((item) {
       String dateStr = item['date'].toString();
       dateStr = dateStr.replaceAll(' ', 'T');
-      if (dateStr.endsWith('Z')) {
-        dateStr = dateStr.substring(0, dateStr.length - 1);
+      if (!dateStr.endsWith('Z')) {
+        dateStr += 'Z';
       }
-      final dt = (DateTime.tryParse(dateStr) ?? DateTime.now());
+      final dt = (DateTime.tryParse(dateStr) ?? DateTime.now()).toLocal();
       
       final rawItemsList =
           (item['items_detail'] as List?)

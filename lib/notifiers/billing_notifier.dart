@@ -147,6 +147,38 @@ class BillingNotifier extends Notifier<BillingState> {
     state = state.copyWith(currentBill: updatedBill);
   }
 
+  void updateItemPrice(int index, double newPrice) {
+    if (newPrice < 0) return;
+    final updatedBill = List<Map<String, dynamic>>.from(state.currentBill);
+    int qty = (updatedBill[index]['qty'] as num).toInt();
+    double discount = (updatedBill[index]['discount'] as num?)?.toDouble() ?? 0.0;
+    
+    double itemTotal = qty * newPrice;
+    double itemTotalAfterDiscount = itemTotal - (itemTotal * (discount / 100));
+    
+    updatedBill[index] = {
+      ...updatedBill[index],
+      'price': newPrice,
+      'unit_price': newPrice,
+      'total': itemTotalAfterDiscount,
+    };
+    state = state.copyWith(currentBill: updatedBill);
+  }
+
+  void updateItemGst(int index, double totalGst) {
+    if (totalGst < 0) return;
+    final updatedBill = List<Map<String, dynamic>>.from(state.currentBill);
+    final halfGst = totalGst / 2.0;
+    
+    updatedBill[index] = {
+      ...updatedBill[index],
+      'gst': totalGst,
+      'cgst': halfGst,
+      'sgst': halfGst,
+    };
+    state = state.copyWith(currentBill: updatedBill);
+  }
+
   void removeItem(int index) {
     final updatedBill = List<Map<String, dynamic>>.from(state.currentBill);
     updatedBill.removeAt(index);
@@ -162,18 +194,6 @@ class BillingNotifier extends Notifier<BillingState> {
       discountValue: value,
       isDiscountPercentage: isPercentage,
     );
-  }
-
-  void updateItemGst(int index, bool enabled, double rate) {
-    final updatedBill = List<Map<String, dynamic>>.from(state.currentBill);
-    updatedBill[index] = {
-      ...updatedBill[index],
-      'gst_enabled': enabled,
-      'gst_rate': rate,
-      'cgst': enabled ? rate / 2 : 0.0,
-      'sgst': enabled ? rate / 2 : 0.0,
-    };
-    state = state.copyWith(currentBill: updatedBill);
   }
 
   void updateReceivedAmount(double amount) {

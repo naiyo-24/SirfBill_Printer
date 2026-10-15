@@ -49,10 +49,10 @@ class CustomerNotifier extends AsyncNotifier<List<Map<String, dynamic>>> {
             totalPurchases += (h['amount'] as num?)?.toDouble() ?? 0.0;
             String dateStr = h['date'].toString();
             dateStr = dateStr.replaceAll(' ', 'T');
-            if (dateStr.endsWith('Z')) {
-              dateStr = dateStr.substring(0, dateStr.length - 1);
+            if (!dateStr.endsWith('Z')) {
+              dateStr += 'Z';
             }
-            final dt = DateTime.tryParse(dateStr);
+            final dt = DateTime.tryParse(dateStr)?.toLocal();
             if (dt != null) {
               if (lastPurchaseDate == null || dt.isAfter(lastPurchaseDate)) {
                 lastPurchaseDate = dt;
