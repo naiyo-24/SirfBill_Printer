@@ -5,6 +5,7 @@ import 'router/app_router.dart';
 import 'providers/theme_provider.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'services/auth_service.dart';
 
 class AppScrollBehavior extends MaterialScrollBehavior {
   const AppScrollBehavior();
@@ -22,14 +23,43 @@ class AppScrollBehavior extends MaterialScrollBehavior {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  // Always clear previous session on app launch so closing the app automatically logs out
+  await AuthService.logout();
   runApp(const ProviderScope(child: SirfBillApp()));
 }
 
-class SirfBillApp extends ConsumerWidget {
+class SirfBillApp extends ConsumerStatefulWidget {
   const SirfBillApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SirfBillApp> createState() => _SirfBillAppState();
+}
+
+class _SirfBillAppState extends ConsumerState<SirfBillApp> {
+  late final AppLifecycleListener _lifecycleListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycleListener = AppLifecycleListener(
+      onExitRequested: () async {
+        await AuthService.logout();
+        return AppExitResponse.exit;
+      },
+      onDetach: () {
+        AuthService.logout();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
 
     const noSwipePageTransitionsTheme = PageTransitionsTheme(
